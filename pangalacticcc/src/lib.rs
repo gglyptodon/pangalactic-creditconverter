@@ -1,5 +1,7 @@
 use clap::{Arg, Command};
 use std::error::Error;
+use std::fs::File;
+use std::io::BufRead;
 
 type PccResult<T> = Result<T, Box<dyn Error>>;
 
@@ -34,8 +36,22 @@ pub fn get_args() -> PccResult<Config> {
 /// output is printed to stdout
 pub fn run(config: Config) -> PccResult<()> {
     //unimplemented!();
-    println!("{:?}", config);
+    let reader = open(&config.path)?;
+    for line in reader.lines() {
+        println!("{:?}", line);
+    }
+
     Ok(())
+}
+
+pub fn open(path: &String) -> PccResult<Box<dyn BufRead>> {
+    if path == "-" {
+        // input is stdin
+        Ok(Box::new(std::io::BufReader::new(std::io::stdin())))
+    } else {
+        // input read from file
+        Ok(Box::new(std::io::BufReader::new(File::open(path)?)))
+    }
 }
 
 #[cfg(test)]
