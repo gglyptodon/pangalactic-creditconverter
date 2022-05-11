@@ -49,7 +49,6 @@ fn run_stdin(input_file: &str, args: &[&str], expected_file: &str) -> TestResult
     Ok(())
 }
 
-
 #[test]
 fn die_on_non_existing_file() -> TestResult {
     let non_existing = gen_non_existing_file();
@@ -63,11 +62,13 @@ fn die_on_non_existing_file() -> TestResult {
 }
 
 #[test]
-fn test_input1()->TestResult{
-    run(&[INPUT1],OUTPUT1)
+#[ignore]
+fn test_input1() -> TestResult {
+    run(&[INPUT1], OUTPUT1)
 }
 
 #[test]
-fn test_input1_stdin()->TestResult{
-    run_stdin(INPUT1,&[],OUTPUT1)
+#[ignore]
+fn test_input1_stdin() -> TestResult {
+    run_stdin(INPUT1, &[], OUTPUT1)
 }
