@@ -84,6 +84,14 @@ mod tests {
             _ => panic!("this should be an error"),
         }
     }
+     #[test]
+    fn test_roman_invalid_strings_raise_error_y() {
+        let result = "Y".parse::<Roman>();
+        match result {
+            Err(e) => assert_eq!(e.to_string(), "invalid string for roman numeral"),
+            _ => panic!("this should be an error"),
+        }
+    }
 
     #[test]
     fn test_roman_m_ok() {
