@@ -1,4 +1,4 @@
-mod roman;
+pub mod roman;
 use clap::{Arg, Command};
 use regex::Regex;
 use std::collections::HashMap;
