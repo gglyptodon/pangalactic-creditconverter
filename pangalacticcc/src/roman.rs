@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
@@ -127,20 +127,46 @@ impl FromStr for Roman {
             return Err(ParseRomanNumeralError);
         }
         // contains invalid character
-        if !s
-            .chars()
-            .all(|c| ROMAN_VALUES.keys().any(|x|x==&c))
-        {
+        if !s.chars().all(|c| ROMAN_VALUES.keys().any(|x| x == &c)) {
             return Err(ParseRomanNumeralError);
         }
 
-        // todo: actually implement...
-        unimplemented!();
-        //
-        // Ok(Roman {
-        //     repr: s.to_string(),
-        //     value,
-        // })
+        // a bit hacky...
+        // Perform math on the input characters (e.g. add 10 for X
+        // (or subtract 10 if followed by numeral for larger number, respectively) etc.
+        // Check if result is within representable bounds (0<=result<4000).
+        // If so, convert the result of the calculation to roman numerals
+        // via Roman::from<u32> implemented above
+        // Check if the original representation matches the newly calculated representation.
+        // If they match, the input was valid, otherwise return ParseRomanNumeralError
+
+        //convert single numerals to their values
+        let values: Vec<i32> = s.chars().map(|c| ROMAN_VALUES[&c]).collect();
+        let mut sum = 0;
+        for (i, v) in values.iter().enumerate() {
+            if let Some(next_value) = values.get(i + 1) {
+                if v < next_value {
+                    sum -= v
+                } else {
+                    sum += v
+                }
+            } else {
+                sum += v //last
+            }
+        }
+        if sum <= 0 || sum >= 4000 {
+            return Err(ParseRomanNumeralError);
+        }
+
+        let valid_numeral_for_result = Roman::from(sum as u32).repr;
+        if valid_numeral_for_result != s {
+            return Err(ParseRomanNumeralError);
+        }
+
+        Ok(Roman {
+            repr: s.to_string(),
+            value: sum,
+        })
     }
 }
 
