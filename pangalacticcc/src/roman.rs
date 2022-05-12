@@ -38,6 +38,78 @@ impl Display for Roman {
     }
 }
 
+// from integer to Roman numeral
+impl From<u32> for Roman {
+    fn from(num: u32) -> Self {
+        if num >= 4000 {
+            panic!(
+                "{} cannot be converted. Hint: Only uint values <= 4000 can be represented. ",
+                num
+            )
+        }
+        let mut result = "".to_string();
+        let thousands = num / 1000;
+        let hundreds = (num - thousands * 1000) / 100;
+        let tens = (num - thousands * 1000 - hundreds * 100) / 10;
+        let units = num - thousands * 1000 - hundreds * 100 - tens * 10;
+        //todo: refactor
+
+        if let 0..=3 = thousands {
+            for _ in 0..thousands {
+                result.push('M')
+            }
+        }
+
+        match hundreds {
+            0..=3 => {
+                for _ in 0..hundreds {
+                    result.push('C')
+                }
+            }
+            4 => result.push_str("CD"),
+            5 => result.push('D'),
+            6 => result.push_str("DC"),
+            7 => result.push_str("DCC"),
+            8 => result.push_str("DCCC"),
+            9 => result.push_str("CM"),
+            _ => {}
+        }
+        match tens {
+            0..=3 => {
+                for _ in 0..tens {
+                    result.push('X')
+                }
+            }
+            4 => result.push_str("XL"),
+            5 => result.push('L'),
+            6 => result.push_str("LX"),
+            7 => result.push_str("LXX"),
+            8 => result.push_str("LXXX"),
+            9 => result.push_str("XC"),
+            _ => {}
+        }
+        match units {
+            0..=3 => {
+                for _ in 0..units {
+                    result.push('I')
+                }
+            }
+            4 => result.push_str("IV"),
+            5 => result.push('V'),
+            6 => result.push_str("VI"),
+            7 => result.push_str("VII"),
+            8 => result.push_str("VIII"),
+            9 => result.push_str("IX"),
+            _ => {}
+        }
+
+        Roman {
+            repr: result,
+            value: num as i32,
+        }
+    }
+}
+
 impl FromStr for Roman {
     type Err = ParseRomanNumeralError;
     /// The symbols "I", "X", "C", and "M" can be repeated three times in succession, but no more.
@@ -63,12 +135,12 @@ impl FromStr for Roman {
         }
 
         // todo: actually implement...
-        unimplemented!()
+        unimplemented!();
 
-        //Ok(Roman {
-        //    repr: s.to_string(),
-        //    value,
-        //})
+        // Ok(Roman {
+        //     repr: s.to_string(),
+        //     value,
+        // })
     }
 }
 
@@ -76,6 +148,37 @@ impl FromStr for Roman {
 mod tests {
     use super::*;
 
+    /* uint to Roman */
+    #[test]
+    fn test_int_to_roman_1000() {
+        assert_eq!(Roman::from(1000).repr, "M")
+    }
+    #[test]
+    fn test_int_to_roman_900() {
+        assert_eq!(Roman::from(900).repr, "CM")
+    }
+    #[test]
+    fn test_int_to_roman_3() {
+        assert_eq!(Roman::from(3).repr, "III")
+    }
+    #[test]
+    fn test_int_to_roman_1903() {
+        assert_eq!(Roman::from(1903).repr, "MCMIII")
+    }
+    #[test]
+    #[should_panic]
+    fn test_int_to_roman_4000() {
+        let _that_wont_work = Roman::from(4000);
+    }
+    #[test]
+    fn test_int_to_roman_3999() {
+        assert_eq!(Roman::from(3999).repr, "MMMCMXCIX")
+    }
+    #[test]
+    fn test_int_to_roman_42() {
+        assert_eq!(Roman::from(42).repr, "XLII")
+    }
+    /* Roman to int */
     #[test]
     fn test_roman_invalid_strings_raise_error() {
         let result = "".parse::<Roman>();
@@ -84,7 +187,7 @@ mod tests {
             _ => panic!("this should be an error"),
         }
     }
-     #[test]
+    #[test]
     fn test_roman_invalid_strings_raise_error_y() {
         let result = "Y".parse::<Roman>();
         match result {
