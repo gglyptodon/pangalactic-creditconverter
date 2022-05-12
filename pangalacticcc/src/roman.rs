@@ -40,6 +40,16 @@ impl Display for Roman {
 
 impl FromStr for Roman {
     type Err = ParseRomanNumeralError;
+    /// The symbols "I", "X", "C", and "M" can be repeated three times in succession, but no more.
+    /// (They may appear four times if the third and fourth are separated by a smaller value, such as
+    /// XXXIX.)
+    /// "D", "L", and "V" can never be repeated.
+    /// "I" can be subtracted from "V" and "X" only.
+    /// "X" can be subtracted from "L" and "C" only.
+    /// "C" can be subtracted from "D" and "M" only.
+    /// "V", "L", and "D" can never be subtracted.
+    /// Only one small-value symbol may be subtracted from any large-value symbol.
+    ///
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
             return Err(ParseRomanNumeralError);
@@ -141,6 +151,14 @@ mod tests {
         }
     }
     #[test]
+    fn test_roman_cm_ok() {
+        let result = "CM".parse::<Roman>();
+        match result {
+            Ok(r) => assert_eq!(r.value, 900),
+            _ => panic!("this should be Ok"),
+        }
+    }
+    #[test]
     fn test_roman_ccc_ok() {
         let result = "CCC".parse::<Roman>();
         match result {
@@ -165,6 +183,29 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_roman_examples_ok() {
+        let result = "M".parse::<Roman>();
+        match result {
+            Ok(r) => assert_eq!(r.value, 1000),
+            _ => panic!("this should be Ok"),
+        }
+        let result = "CM".parse::<Roman>();
+        match result {
+            Ok(r) => assert_eq!(r.value, 900),
+            _ => panic!("this should be Ok"),
+        }
+        let result = "III".parse::<Roman>();
+        match result {
+            Ok(r) => assert_eq!(r.value, 3),
+            _ => panic!("this should be Ok"),
+        }
+        let result = "MCMIII".parse::<Roman>();
+        match result {
+            Ok(r) => assert_eq!(r.value, 1903),
+            _ => panic!("this should be Ok"),
+        }
+    }
     #[test]
     fn test_roman_misc_ok() {
         let result = "MMMCM".parse::<Roman>();
