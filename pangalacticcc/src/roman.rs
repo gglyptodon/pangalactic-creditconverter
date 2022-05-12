@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
@@ -129,14 +129,14 @@ impl FromStr for Roman {
         // contains invalid character
         if !s
             .chars()
-            .all(|c| ROMAN_VALUES.keys().collect::<Vec<&char>>().contains(&&c))
+            .all(|c| ROMAN_VALUES.keys().any(|x|x==&c))
         {
             return Err(ParseRomanNumeralError);
         }
 
         // todo: actually implement...
         unimplemented!();
-
+        //
         // Ok(Roman {
         //     repr: s.to_string(),
         //     value,
