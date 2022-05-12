@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 lazy_static! {
-    static ref ROMAN_VALUES: HashMap<char, i32> = {
+    pub static ref ROMAN_VALUES: HashMap<char, i32> = {
         let mut map = HashMap::new();
         map.insert('M', 1000);
         map.insert('D', 500);
@@ -29,7 +29,7 @@ impl Display for ParseRomanNumeralError {
 #[derive(Debug)]
 pub struct Roman {
     repr: String,
-    value: i32,
+    pub(crate) value: i32,
 }
 
 impl Display for Roman {
