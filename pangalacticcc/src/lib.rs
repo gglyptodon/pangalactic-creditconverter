@@ -44,6 +44,16 @@ pub fn run(config: Config) -> PccResult<()> {
         println!("{:?}", line);
     }
 
+    // outline
+    // - extract statements and questions
+    // - convert numerals from input to roman numerals
+    // - roman numerals -> values as decimal numbers in arabic numerals
+    //   -> answering questions "how much is $amount" possible
+    // - extract units from input
+    // - calculate conversion rate 1 $unit <-> N Credits
+    //   -> answering questions "how many Credits is $amount $unit ?" possible
+    // check for invalid inputs
+
     Ok(())
 }
 
@@ -127,6 +137,7 @@ mod tests {
      }
 
     #[test] // todo: should that work?
+    #[ignore]
     fn test_numerals_to_roman_dashes() {
         assert_eq!(
             numerals_to_roman("fi-ve is V"),
