@@ -94,7 +94,6 @@ pub fn run(config: Config) -> PccResult<()> {
         }
     }
 
-
     // outline
     // - extract statements and questions [x]
     // - convert numerals from input to roman numerals [x]
@@ -109,7 +108,7 @@ pub fn run(config: Config) -> PccResult<()> {
 }
 pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) -> String {
     // how much is pish tegj glob glob ?
-    // pish tegj glob glob is 42
+    // -> pish tegj glob glob is 42
     //todo refactor
     let mut orig: Vec<String> = Vec::new();
     let mut numerals: Vec<String> = Vec::new();
@@ -138,14 +137,42 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
     }
 }
 
-pub fn answer_how_many(
+pub fn answer_how_many_credits(
     numeral_mapping: &HashMap<String, char>,
-    unit_mapping: &HashMap<String, u32>,
+    unit_mapping: &HashMap<String, f64>,
     question: &str,
 ) -> String {
-    //glob prok Iron is 782 Credits
-    unimplemented!()
+    // how many Credits is glob prok Iron ?
+    // -> glob prok Iron is 782 Credits
+    //let mut orig: Vec<String> = Vec::new();
+    //let mut numerals: Vec<String> = Vec::new();
+    //for word in question.split("how many Credits is ") {
+
+    // todo refactor
+    let mut amount_unit = question
+        .split("how many Credits is ")
+        .into_iter()
+        .map(|element| element.trim_start().trim_end().strip_suffix("?"))
+        .filter_map(|x| x)
+        .map(|x| x.trim_end())
+        .collect::<Vec<_>>();
+
+
+    let mut amount = amount_unit[0].split(" ").collect::<Vec<_>>();
+    let unit = &amount.pop().unwrap();
+
+    let roman_number = amount.iter().filter_map(|x|numeral_mapping.get(*x)).collect::<String>(); // todo
+    println!("{:?}, {:?} {:?} units: {:?}", amount, roman_number, numeral_mapping, unit_mapping);
+    if let Some(value) = unit_mapping.get(*unit){
+        if let Ok(amount_parsed) = roman_number.parse::<Roman>(){
+            return  format!("{} {} is {} Credits", amount.join(" "), unit,amount_parsed.value as f64 *value )
+        }
+
+    }
+    "I have no idea what you are talking about".to_string() //todo err
 }
+
+
 
 pub fn open(path: &String) -> PccResult<Box<dyn BufRead>> {
     if path == "-" {
@@ -195,6 +222,18 @@ mod tests {
         let question = "how much is blub blubber ?"; // VL -> ParseRomanNumeralError
         let expected = "I have no idea what you are talking about";
         let result = answer_how_much(&hm, question);
+        assert_eq!(expected, result)
+    }
+    #[test]
+    fn test_answer_how_many_example_86() {
+        let mut nm: HashMap<String, char> = HashMap::new();
+        nm.insert("glob".to_string(), 'I');
+        nm.insert("prok".to_string(), 'V');
+        let mut um: HashMap<String, f64> = HashMap::new();
+        um.insert("Silver".to_string(), 21.5);
+        let question = "how many Credits is glob prok Silver ?";
+        let expected = "glob prok Silver is 86 Credits";
+        let result = answer_how_many_credits(&nm, &um, question);
         assert_eq!(expected, result)
     }
 }
