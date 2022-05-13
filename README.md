@@ -1,5 +1,7 @@
 # pangalactic-creditconverter
 
+[![Rust](https://github.com/gglyptodon/pangalactic-creditconverter/actions/workflows/rust.yml/badge.svg)](https://github.com/gglyptodon/pangalactic-creditconverter/actions/workflows/rust.yml)
+
 Converts alien numerals.
 Input is read from stdin or text file.
 Output is printed to stdout.
