@@ -62,7 +62,6 @@ fn die_on_non_existing_file() -> TestResult {
 }
 
 #[test]
-#[ignore]
 fn test_input1() -> TestResult {
     run(&[INPUT1], OUTPUT1)
 }

@@ -95,8 +95,7 @@ pub fn extract_amounts_from_sentence(
     None
 }
 
-pub fn extract_amount_credits_from_sentence(
-    sentence: &str) -> Option<i32> {
+pub fn extract_amount_credits_from_sentence(sentence: &str) -> Option<i32> {
     // assuming Credits is agreed upon
     /// example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
@@ -110,11 +109,11 @@ pub fn extract_amount_credits_from_sentence(
         if result.len() != 3 {
             return None;
         }
-        println!("DEBUG: {:?}", result);
-        if let Some(num_credits) = result.get(2){
-           if let Ok(result) =num_credits.parse::<i32>(){
-               return Some(result)
-           }
+        //println!("DEBUG: {:?}", result);
+        if let Some(num_credits) = result.get(2) {
+            if let Ok(result) = num_credits.parse::<i32>() {
+                return Some(result);
+            }
         }
     }
     None
@@ -126,8 +125,9 @@ pub fn extract_unit_values_from_sentence(
 ) -> Option<(String, f64)> {
     if let Some(amount) = extract_amounts_from_sentence(&numeral_map, sentence) {
         if let Some(unit) = extract_units_from_sentence(sentence) {
-            if let Some(num_credits) = extract_amount_credits_from_sentence(sentence){
-                return Some((unit, num_credits as f64 / amount as f64)) }
+            if let Some(num_credits) = extract_amount_credits_from_sentence(sentence) {
+                return Some((unit, num_credits as f64 / amount as f64));
+            }
         }
     }
     None
@@ -409,7 +409,7 @@ mod tests {
         let silver_unit = "glob glob Silver is 34 Credits";
         let testmap = create_testmap();
         let expected = ("Silver".to_string(), 34.0 / 2.0);
-        let result = extract_unit_values_from_sentence(&testmap,silver_unit);
+        let result = extract_unit_values_from_sentence(&testmap, silver_unit);
         assert_eq!(Some(expected), result)
     }
 
@@ -463,7 +463,7 @@ mod tests {
         let iron_unit = "pish pish Iron is 3910 Credits";
         let expected = ("Iron".to_string(), 3910.0 / 20.0);
         let testmap = create_testmap();
-        let result = extract_unit_values_from_sentence(&testmap,iron_unit);
+        let result = extract_unit_values_from_sentence(&testmap, iron_unit);
         assert_eq!(Some(expected), result)
     }
 }

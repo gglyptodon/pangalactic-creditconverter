@@ -94,6 +94,24 @@ pub fn run(config: Config) -> PccResult<()> {
         }
     }
 
+    let mut unit_mapping: HashMap<String, f64> = HashMap::new();
+    for sentence in unit_info{
+        if let Some((k,v)) = textprocessing::extract_unit_values_from_sentence(&numeral_mapping,sentence){
+            unit_mapping.insert(k,v);
+        }
+    }
+    //println!("UNITS {:#?}", unit_mapping);
+
+    //todo: is order important?
+    for q in how_much_questions{
+        println!("{}", answer_how_much(&numeral_mapping,q));
+    }
+    //todo: is order important?
+    for q in how_many_credits_questions{
+        println!("{}", answer_how_many_credits(&numeral_mapping,&unit_mapping,q));
+    }
+    // todo: uncategorized
+
     // outline
     // - extract statements and questions [x]
     // - convert numerals from input to roman numerals [x]
