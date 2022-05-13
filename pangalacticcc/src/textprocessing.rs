@@ -42,11 +42,24 @@ pub fn is_numeral_info(sentence: &str) -> bool {
     }
 }
 
-pub fn extract_units_from_sentence(sentence: &str) -> Option<(String, String)> {
+pub fn extract_units_from_sentence(sentence: &str) -> Option<(String)> {
     // assuming Credits is agreed upon
     /// example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
-    unimplemented!()
+    if let Some(captures) = unit_regex.captures(&sentence) {
+        let result = captures
+            .iter()
+            .map(|m| m.unwrap().as_str().to_string().clone())
+            .collect::<Vec<_>>();
+        // capture group 0 is always entire match,
+        // group 1: $amount $unit, group 2: $amount_arabic_numerals
+        if result.len() != 3 {
+            return None;
+        }
+        let unit = result.get(1).unwrap().split(" ").last().unwrap();
+        return Some(unit.to_string());
+    }
+    None
 }
 
 pub fn numerals_to_roman(sentence: &str) -> Option<(String, String)> {
@@ -254,5 +267,32 @@ mod tests {
         expected[6] = true;
         let results: Vec<bool> = FULL_EXAMPLE.iter().map(|x| is_unit_info(x)).collect();
         assert_eq!(expected, results)
+    }
+    #[test]
+    fn test_extract_unit_gold() {
+        let gold_unit = "glob prok Gold is 57800 Credits";
+        let expected = "Gold".to_string();
+        let result = extract_units_from_sentence(gold_unit);
+        assert_eq!(Some(expected), result)
+    }
+    #[test]
+    fn test_extract_unit_iron() {
+        let iron_unit = "pish pish Iron is 3910 Credits";
+        let expected = "Iron".to_string();
+        let result = extract_units_from_sentence(iron_unit);
+        assert_eq!(Some(expected), result)
+    }
+    #[test]
+    fn test_extract_unit_silver() {
+        let silver_unit = "glob glob Silver is 34 Credits";
+        let expected = "Silver".to_string();
+        let result = extract_units_from_sentence(silver_unit);
+        assert_eq!(Some(expected), result)
+    }
+    #[test]
+    fn test_extract_unit_gold_none() {
+        let expected = None;
+        let result = extract_units_from_sentence(GLOB_I);
+        assert_eq!(expected, result)
     }
 }
