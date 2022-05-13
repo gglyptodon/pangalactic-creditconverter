@@ -42,7 +42,7 @@ pub fn is_numeral_info(sentence: &str) -> bool {
     }
 }
 
-pub fn extract_units_from_sentence(sentence: &str) -> Option<(String)> {
+pub fn extract_units_from_sentence(sentence: &str) -> Option<String> {
     // assuming Credits is agreed upon
     /// example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
@@ -60,6 +60,27 @@ pub fn extract_units_from_sentence(sentence: &str) -> Option<(String)> {
         return Some(unit.to_string());
     }
     None
+}
+
+pub fn extract_unit_values_from_sentence(sentence: &str) -> Option<(String,f64)> {
+    // assuming Credits is agreed upon
+    /// example input: glob prok Iron is 782 Credits
+    let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
+    if let Some(captures) = unit_regex.captures(&sentence) {
+        let result = captures
+            .iter()
+            .map(|m| m.unwrap().as_str().to_string().clone())
+            .collect::<Vec<_>>();
+        // capture group 0 is always entire match,
+        // group 1: $amount $unit, group 2: $amount_arabic_numerals
+        if result.len() != 3 {
+            return None;
+        }
+        let unit = result.get(1).unwrap().split(" ").last().unwrap();
+        todo!()
+
+    }
+    todo!()
 }
 
 pub fn numerals_to_roman(sentence: &str) -> Option<(String, String)> {
@@ -112,6 +133,7 @@ mod tests {
     fn test_tests_run() {
         assert_eq!(1 + 2, 3);
     }
+
     #[test]
     fn test_numerals_to_roman_from_example() {
         assert_eq!(
@@ -131,6 +153,7 @@ mod tests {
             Some(("tegj".to_string(), "L".to_string()))
         )
     }
+
     #[test]
     fn test_numerals_to_roman_non_ascii() {
         assert_eq!(
@@ -138,6 +161,7 @@ mod tests {
             Some(("五".to_string(), "V".to_string()))
         );
     }
+
     #[test]
     fn test_numerals_to_roman_arabic_numbers() {
         assert_eq!(
@@ -145,6 +169,7 @@ mod tests {
             Some(("5".to_string(), "V".to_string()))
         );
     }
+
     #[test]
     fn test_numerals_to_roman_mixed() {
         assert_eq!(
@@ -191,6 +216,7 @@ mod tests {
         //println!("{r}");
         assert_eq!(r.value, 1)
     }
+
     #[test]
     fn test_simple_sentence_to_value_prok() {
         let mapping = numerals_to_roman(PROK_V).unwrap();
@@ -198,6 +224,7 @@ mod tests {
         //println!("{r}");
         assert_eq!(r.value, 5)
     }
+
     #[test]
     fn test_simple_sentence_to_value_pish() {
         let mapping = numerals_to_roman(PISH_X).unwrap();
@@ -268,6 +295,7 @@ mod tests {
         let results: Vec<bool> = FULL_EXAMPLE.iter().map(|x| is_unit_info(x)).collect();
         assert_eq!(expected, results)
     }
+
     #[test]
     fn test_extract_unit_gold() {
         let gold_unit = "glob prok Gold is 57800 Credits";
@@ -275,6 +303,7 @@ mod tests {
         let result = extract_units_from_sentence(gold_unit);
         assert_eq!(Some(expected), result)
     }
+
     #[test]
     fn test_extract_unit_iron() {
         let iron_unit = "pish pish Iron is 3910 Credits";
@@ -282,6 +311,7 @@ mod tests {
         let result = extract_units_from_sentence(iron_unit);
         assert_eq!(Some(expected), result)
     }
+
     #[test]
     fn test_extract_unit_silver() {
         let silver_unit = "glob glob Silver is 34 Credits";
@@ -289,10 +319,38 @@ mod tests {
         let result = extract_units_from_sentence(silver_unit);
         assert_eq!(Some(expected), result)
     }
+
     #[test]
     fn test_extract_unit_gold_none() {
         let expected = None;
         let result = extract_units_from_sentence(GLOB_I);
         assert_eq!(expected, result)
     }
+
+    #[test]
+    fn test_extract_unit_val_gold() {
+        let gold_unit = "glob prok Gold is 57800 Credits";
+        let expected = ("Gold".to_string(), 57800.0/4.0);
+        let result = extract_unit_values_from_sentence(gold_unit);
+        assert_eq!(Some(expected), result)
+    }
+
+    #[test]
+    fn test_extract_unit_val_iron() {
+        let iron_unit = "pish pish Iron is 3910 Credits";
+        let expected = ("Iron".to_string(), 3910.0/20.0);
+        let result = extract_unit_values_from_sentence(iron_unit);
+        assert_eq!(Some(expected), result)
+    }
+
+    #[test]
+    fn test_extract_unit_values_silver() {
+        let silver_unit = "glob glob Silver is 34 Credits";
+        let expected = ("Silver".to_string(), 34.0/2.0);
+        let result = extract_unit_values_from_sentence(silver_unit);
+        assert_eq!(Some(expected), result)
+    }
+    //todo integration tests
+
+
 }
