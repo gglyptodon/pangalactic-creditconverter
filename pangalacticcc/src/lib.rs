@@ -62,15 +62,15 @@ pub fn run(config: Config) -> PccResult<()> {
 
     Ok(())
 }
-pub fn answer_how_much(numeral_mapping: &HashMap<String, String>, question: &String) -> String {
+pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) -> String {
     //pish tegj glob glob is 42
     unimplemented!()
 }
 
 pub fn answer_how_many(
-    numeral_mapping: &HashMap<String, String>,
+    numeral_mapping: &HashMap<String, char>,
     unit_mapping: &HashMap<String, u32>,
-    question: &String,
+    question: &str,
 ) -> String {
     //glob prok Iron is 782 Credits
     unimplemented!()
@@ -83,5 +83,25 @@ pub fn open(path: &String) -> PccResult<Box<dyn BufRead>> {
     } else {
         // input read from file
         Ok(Box::new(std::io::BufReader::new(File::open(path)?)))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_answer_how_much() {
+        let mut hm: HashMap<String,char> = HashMap::new();
+        hm.insert("glob".to_string(), 'I');
+        hm.insert("prok".to_string(), 'V');
+        hm.insert("tegj".to_string(), 'L');
+        hm.insert("pish".to_string(), 'X');
+        let question = "how much is pish tegj glob glob ?";
+        let expected = "pish tegj glob glob is 42";
+        let result = answer_how_much(&hm,question);
+        assert_eq!(expected,result)
+
+
     }
 }
