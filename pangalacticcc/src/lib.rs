@@ -17,6 +17,8 @@ use std::io::{BufRead, Read};
 
 type PccResult<T> = Result<T, Box<dyn Error>>;
 
+const DEFAULT_RESPONSE: &str = "I have no idea what you are talking about";
+
 #[derive(Debug)]
 pub struct Config {
     /// path to the input file with the gathered information.
@@ -85,6 +87,18 @@ pub fn run(config: Config) -> PccResult<()> {
         .filter(|x| is_question_how_many_credits(x))
         .collect::<Vec<_>>();
 
+    // collect anything else that doesn't match the other patterns
+    let uncategorized = contents
+        .iter()
+        .filter(|x| {
+            !is_numeral_info(x)
+                && !is_unit_info(x)
+                && !is_question_how_much(x)
+                && !is_question_how_many_credits(x)
+                && !x.is_empty()
+        })
+        .collect::<Vec<_>>();
+
     // init and populate alien numerals -> roman numerals mapping
     let mut numeral_mapping: HashMap<String, char> = HashMap::new();
     // todo:refactor
@@ -95,22 +109,30 @@ pub fn run(config: Config) -> PccResult<()> {
     }
 
     let mut unit_mapping: HashMap<String, f64> = HashMap::new();
-    for sentence in unit_info{
-        if let Some((k,v)) = textprocessing::extract_unit_values_from_sentence(&numeral_mapping,sentence){
-            unit_mapping.insert(k,v);
+    for sentence in unit_info {
+        if let Some((k, v)) =
+            textprocessing::extract_unit_values_from_sentence(&numeral_mapping, sentence)
+        {
+            unit_mapping.insert(k, v);
         }
     }
     //println!("UNITS {:#?}", unit_mapping);
 
     //todo: is order important?
-    for q in how_much_questions{
-        println!("{}", answer_how_much(&numeral_mapping,q));
+    for q in how_much_questions {
+        println!("{}", answer_how_much(&numeral_mapping, q));
     }
     //todo: is order important?
-    for q in how_many_credits_questions{
-        println!("{}", answer_how_many_credits(&numeral_mapping,&unit_mapping,q));
+    for q in how_many_credits_questions {
+        println!(
+            "{}",
+            answer_how_many_credits(&numeral_mapping, &unit_mapping, q)
+        );
     }
     // todo: uncategorized
+    for _ in uncategorized {
+        println!("{}", DEFAULT_RESPONSE);
+    }
 
     // outline
     // - extract statements and questions [x]
@@ -131,20 +153,17 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
     //todo refactor
     let mut orig: Vec<String> = Vec::new();
     let mut numerals: Vec<String> = Vec::new();
-    for word in question.split(" ") {
-        match numeral_mapping.get(word) {
+    for word in question.split(' ') {
+        if let Some(value) = numeral_mapping.get(word) {
             //todo: better error handling
-            Some(value) => {
-                numerals.push(
-                    value
-                        .to_string()
-                        .parse::<Roman>()
-                        .expect("something went wrong while parsing")
-                        .repr,
-                );
-                orig.push(word.to_string())
-            }
-            None => {} //todo
+            numerals.push(
+                value
+                    .to_string()
+                    .parse::<Roman>()
+                    .expect("something went wrong while parsing")
+                    .repr,
+            );
+            orig.push(word.to_string());
         }
     }
 
@@ -165,15 +184,14 @@ pub fn answer_how_many_credits(
     // -> glob prok Iron is 782 Credits
 
     // todo refactor
-    let mut amount_unit = question
+    let amount_unit = question
         .split("how many Credits is ")
         .into_iter()
-        .map(|element| element.trim_start().trim_end().strip_suffix("?"))
-        .filter_map(|x| x)
+        .filter_map(|element| element.trim_start().trim_end().strip_suffix('?'))
         .map(|x| x.trim_end())
         .collect::<Vec<_>>();
 
-    let mut amount = amount_unit[0].split(" ").collect::<Vec<_>>();
+    let mut amount = amount_unit[0].split(' ').collect::<Vec<_>>();
     let unit = &amount.pop().unwrap();
 
     let roman_number = amount
@@ -194,7 +212,7 @@ pub fn answer_how_many_credits(
     "I have no idea what you are talking about".to_string() //todo err
 }
 
-pub fn open(path: &String) -> PccResult<Box<dyn BufRead>> {
+pub fn open(path: &str) -> PccResult<Box<dyn BufRead>> {
     if path == "-" {
         // input is stdin
         Ok(Box::new(std::io::BufReader::new(std::io::stdin())))
@@ -221,6 +239,7 @@ mod tests {
         let result = answer_how_much(&hm, question);
         assert_eq!(expected, result)
     }
+
     #[test]
     fn test_answer_how_much_bla_8() {
         let mut hm: HashMap<String, char> = HashMap::new();
