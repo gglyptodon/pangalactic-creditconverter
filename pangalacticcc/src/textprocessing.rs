@@ -73,7 +73,6 @@ pub fn numerals_to_roman(sentence: &str) -> Option<(String, String)> {
 mod tests {
     use super::*;
     use crate::roman::Roman;
-    use std::mem::transmute;
 
     const GLOB_I: &str = "glob is I";
     const PROK_V: &str = "prok is V";
