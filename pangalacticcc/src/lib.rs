@@ -2,7 +2,10 @@ pub mod roman;
 pub mod textprocessing;
 
 use crate::roman::Roman;
-use crate::textprocessing::numerals_to_roman;
+use crate::textprocessing::{
+    is_numeral_info, is_question_how_many_credits, is_question_how_much, is_unit_info,
+    numerals_to_roman,
+};
 
 use clap::{Arg, Command};
 use regex::Regex;
@@ -10,7 +13,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::fs::File;
-use std::io::BufRead;
+use std::io::{BufRead, Read};
 
 type PccResult<T> = Result<T, Box<dyn Error>>;
 
@@ -45,16 +48,55 @@ pub fn get_args() -> PccResult<Config> {
 /// output is printed to stdout
 pub fn run(config: Config) -> PccResult<()> {
     //unimplemented!();
-    let reader = open(&config.path)?;
-    for line in reader.lines() {
-        println!("{:?}", line);
+    let mut reader = open(&config.path)?;
+    let mut buff = String::new();
+
+    reader.read_to_string(&mut buff)?;
+
+    let contents = buff
+        .split('\n')
+        .into_iter()
+        .map(|x| x.trim_end().trim_start())
+        .collect::<Vec<_>>();
+
+    let numeral_info = contents
+        .iter()
+        .filter(|x| is_numeral_info(x))
+        .collect::<Vec<_>>();
+
+    let unit_info = contents
+        .iter()
+        .filter(|x| is_unit_info(x))
+        .collect::<Vec<_>>();
+
+    let how_much_questions = contents
+        .iter()
+        .filter(|x| is_question_how_much(x))
+        .collect::<Vec<_>>();
+
+    let how_many_credits_questions = contents
+        .iter()
+        .filter(|x| is_question_how_many_credits(x))
+        .collect::<Vec<_>>();
+
+    let mut numeral_mapping: HashMap<String, char> = HashMap::new();
+
+    // todo:refactor
+    for x in numeral_info {
+        if let Some((k, v)) = numerals_to_roman(x) {
+            numeral_mapping.insert(k, v.parse().unwrap());
+        }
+    }
+    //println!("numeral_map {:?}", numeral_mapping);
+    for q in how_much_questions {
+        println!("{}", answer_how_much(&numeral_mapping, q));
     }
 
     // outline
     // - extract statements and questions
     // - convert numerals from input to roman numerals [x]
     // - roman numerals -> values as decimal numbers in arabic numerals [x]
-    //   -> answering questions "how much is $amount" possible
+    //   -> answering questions "how much is $amount" possible [x]
     // - extract units from input
     // - calculate conversion rate 1 $unit <-> N Credits
     //   -> answering questions "how many Credits is $amount $unit ?" possible
@@ -63,8 +105,34 @@ pub fn run(config: Config) -> PccResult<()> {
     Ok(())
 }
 pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) -> String {
-    //pish tegj glob glob is 42
-    unimplemented!()
+    // how much is pish tegj glob glob ?
+    // pish tegj glob glob is 42
+    //todo refactor
+    let mut orig: Vec<String> = Vec::new();
+    let mut numerals: Vec<String> = Vec::new();
+    for word in question.split(" ") {
+        match numeral_mapping.get(word) {
+            //todo: better error handling
+            Some(value) => {
+                numerals.push(
+                    value
+                        .to_string()
+                        .parse::<Roman>()
+                        .expect("something went wrong while parsing")
+                        .repr,
+                );
+                orig.push(word.to_string())
+            }
+            None => {} //todo
+        }
+    }
+
+    //println!("DEBUG: {:?} -> {:?}", orig, numerals);
+    if let Ok(result) = numerals.join("").parse::<Roman>() {
+        format!("{} is {}", orig.join(" "), result.value)
+    } else {
+        "I have no idea what you are talking about".to_string() //todo err
+    }
 }
 
 pub fn answer_how_many(
@@ -88,45 +156,42 @@ pub fn open(path: &String) -> PccResult<Box<dyn BufRead>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::roman::ParseRomanNumeralError;
     use super::*;
+    use crate::roman::ParseRomanNumeralError;
 
     #[test]
     fn test_answer_how_much_example_42() {
-        let mut hm: HashMap<String,char> = HashMap::new();
+        let mut hm: HashMap<String, char> = HashMap::new();
         hm.insert("glob".to_string(), 'I');
         hm.insert("prok".to_string(), 'V');
         hm.insert("tegj".to_string(), 'L');
         hm.insert("pish".to_string(), 'X');
         let question = "how much is pish tegj glob glob ?";
         let expected = "pish tegj glob glob is 42";
-        let result = answer_how_much(&hm,question);
-        assert_eq!(expected,result)
-
-
+        let result = answer_how_much(&hm, question);
+        assert_eq!(expected, result)
     }
     #[test]
     fn test_answer_how_much_bla_8() {
-        let mut hm: HashMap<String,char> = HashMap::new();
+        let mut hm: HashMap<String, char> = HashMap::new();
         hm.insert("bla".to_string(), 'I');
         hm.insert("blub".to_string(), 'V');
         hm.insert("blubber".to_string(), 'L');
         let question = "how much is blub bla bla bla ?";
         let expected = "blub bla bla bla is 8";
-        let result = answer_how_much(&hm,question);
-        assert_eq!(expected,result)
+        let result = answer_how_much(&hm, question);
+        assert_eq!(expected, result)
     }
 
     #[test]
     fn test_answer_how_much_bla_invalid() {
-        let mut hm: HashMap<String,char> = HashMap::new();
+        let mut hm: HashMap<String, char> = HashMap::new();
         hm.insert("bla".to_string(), 'I');
         hm.insert("blub".to_string(), 'V');
         hm.insert("blubber".to_string(), 'L');
         let question = "how much is blub blubber ?"; // VL -> ParseRomanNumeralError
         let expected = "I have no idea what you are talking about";
-        let result = answer_how_much(&hm,question);
-        assert_eq!(expected,result)
+        let result = answer_how_much(&hm, question);
+        assert_eq!(expected, result)
     }
-
 }

@@ -28,7 +28,7 @@ impl Display for ParseRomanNumeralError {
 
 #[derive(Debug)]
 pub struct Roman {
-    repr: String,
+    pub(crate) repr: String,
     pub(crate) value: i32,
 }
 
