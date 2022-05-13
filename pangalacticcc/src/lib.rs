@@ -51,46 +51,49 @@ pub fn run(config: Config) -> PccResult<()> {
     let mut reader = open(&config.path)?;
     let mut buff = String::new();
 
+    // todo: this assumes the input is of manageable size
     reader.read_to_string(&mut buff)?;
 
+    // strip whitespace from start end end of sentences
     let contents = buff
         .split('\n')
         .into_iter()
         .map(|x| x.trim_end().trim_start())
         .collect::<Vec<_>>();
 
+    // collect statements about alien numerals
     let numeral_info = contents
         .iter()
         .filter(|x| is_numeral_info(x))
         .collect::<Vec<_>>();
 
+    // collect statements about alien units
     let unit_info = contents
         .iter()
         .filter(|x| is_unit_info(x))
         .collect::<Vec<_>>();
 
+    // collect questions how much is $sequence_of_alien_numerals
     let how_much_questions = contents
         .iter()
         .filter(|x| is_question_how_much(x))
         .collect::<Vec<_>>();
 
+    // collect questions how many credits is $sequence_of_alien_numerals $alien_unit
     let how_many_credits_questions = contents
         .iter()
         .filter(|x| is_question_how_many_credits(x))
         .collect::<Vec<_>>();
 
+    // init and populate alien numerals -> roman numerals mapping
     let mut numeral_mapping: HashMap<String, char> = HashMap::new();
-
     // todo:refactor
     for x in numeral_info {
         if let Some((k, v)) = numerals_to_roman(x) {
             numeral_mapping.insert(k, v.parse().unwrap());
         }
     }
-    //println!("numeral_map {:?}", numeral_mapping);
-    for q in how_much_questions {
-        println!("{}", answer_how_much(&numeral_mapping, q));
-    }
+
 
     // outline
     // - extract statements and questions [x]
