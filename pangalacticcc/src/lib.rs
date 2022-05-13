@@ -88,10 +88,11 @@ pub fn open(path: &String) -> PccResult<Box<dyn BufRead>> {
 
 #[cfg(test)]
 mod tests {
+    use crate::roman::ParseRomanNumeralError;
     use super::*;
 
     #[test]
-    fn test_answer_how_much() {
+    fn test_answer_how_much_example_42() {
         let mut hm: HashMap<String,char> = HashMap::new();
         hm.insert("glob".to_string(), 'I');
         hm.insert("prok".to_string(), 'V');
@@ -104,4 +105,28 @@ mod tests {
 
 
     }
+    #[test]
+    fn test_answer_how_much_bla_8() {
+        let mut hm: HashMap<String,char> = HashMap::new();
+        hm.insert("bla".to_string(), 'I');
+        hm.insert("blub".to_string(), 'V');
+        hm.insert("blubber".to_string(), 'L');
+        let question = "how much is blub bla bla bla ?";
+        let expected = "blub bla bla bla is 8";
+        let result = answer_how_much(&hm,question);
+        assert_eq!(expected,result)
+    }
+
+    #[test]
+    fn test_answer_how_much_bla_invalid() {
+        let mut hm: HashMap<String,char> = HashMap::new();
+        hm.insert("bla".to_string(), 'I');
+        hm.insert("blub".to_string(), 'V');
+        hm.insert("blubber".to_string(), 'L');
+        let question = "how much is blub blubber ?"; // VL -> ParseRomanNumeralError
+        let expected = "I have no idea what you are talking about";
+        let result = answer_how_much(&hm,question);
+        assert_eq!(expected,result)
+    }
+
 }
