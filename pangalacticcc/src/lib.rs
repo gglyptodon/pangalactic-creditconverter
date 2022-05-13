@@ -93,12 +93,12 @@ pub fn run(config: Config) -> PccResult<()> {
     }
 
     // outline
-    // - extract statements and questions
+    // - extract statements and questions [x]
     // - convert numerals from input to roman numerals [x]
     // - roman numerals -> values as decimal numbers in arabic numerals [x]
     //   -> answering questions "how much is $amount" possible [x]
-    // - extract units from input
-    // - calculate conversion rate 1 $unit <-> N Credits
+    // - extract units from input [x]
+    // - calculate conversion rate 1 $unit <-> N Credits [x]
     //   -> answering questions "how many Credits is $amount $unit ?" possible
     // check for invalid inputs
 

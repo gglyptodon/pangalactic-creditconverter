@@ -1,5 +1,6 @@
 use crate::{roman, Roman};
 use regex::Regex;
+use std::collections::HashMap;
 
 pub fn is_question_how_much(sentence: &str) -> bool {
     /// example: how much is pish tegj glob glob ?
@@ -62,7 +63,10 @@ pub fn extract_units_from_sentence(sentence: &str) -> Option<String> {
     None
 }
 
-pub fn extract_unit_values_from_sentence(sentence: &str) -> Option<(String,f64)> {
+pub fn extract_amounts_from_sentence(
+    numeral_map: &HashMap<String, char>,
+    sentence: &str,
+) -> Option<i32> {
     // assuming Credits is agreed upon
     /// example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
@@ -76,11 +80,57 @@ pub fn extract_unit_values_from_sentence(sentence: &str) -> Option<(String,f64)>
         if result.len() != 3 {
             return None;
         }
-        let unit = result.get(1).unwrap().split(" ").last().unwrap();
-        todo!()
-
+        let mut amount = result.get(1).unwrap().split(" ").collect::<Vec<_>>();
+        amount.pop(); //discard last element which should be the unit
+        if let Ok(roman) = amount
+            .iter()
+            .map(|x| numeral_map.get(*x).unwrap().to_string())
+            .collect::<Vec<_>>()
+            .join("")
+            .parse::<Roman>()
+        {
+            return Some(roman.value);
+        }
     }
-    todo!()
+    None
+}
+
+pub fn extract_amount_credits_from_sentence(
+    sentence: &str) -> Option<i32> {
+    // assuming Credits is agreed upon
+    /// example input: glob prok Iron is 782 Credits
+    let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
+    if let Some(captures) = unit_regex.captures(&sentence) {
+        let result = captures
+            .iter()
+            .map(|m| m.unwrap().as_str().to_string().clone())
+            .collect::<Vec<_>>();
+        // capture group 0 is always entire match,
+        // group 1: $amount $unit, group 2: $amount_arabic_numerals
+        if result.len() != 3 {
+            return None;
+        }
+        println!("DEBUG: {:?}", result);
+        if let Some(num_credits) = result.get(2){
+           if let Ok(result) =num_credits.parse::<i32>(){
+               return Some(result)
+           }
+        }
+    }
+    None
+}
+
+pub fn extract_unit_values_from_sentence(
+    numeral_map: &HashMap<String, char>,
+    sentence: &str,
+) -> Option<(String, f64)> {
+    if let Some(amount) = extract_amounts_from_sentence(&numeral_map, sentence) {
+        if let Some(unit) = extract_units_from_sentence(sentence) {
+            if let Some(num_credits) = extract_amount_credits_from_sentence(sentence){
+                return Some((unit, num_credits as f64 / amount as f64)) }
+        }
+    }
+    None
 }
 
 pub fn numerals_to_roman(sentence: &str) -> Option<(String, String)> {
@@ -128,6 +178,15 @@ mod tests {
         "",
         "how much wood could a woodchuck chuck if a woodchuck could chuck wood ?",
     ];
+
+    fn create_testmap() -> HashMap<String, char> {
+        let mut map = HashMap::new();
+        map.insert("tegj".to_string(), 'L');
+        map.insert("pish".to_string(), 'X');
+        map.insert("prok".to_string(), 'V');
+        map.insert("glob".to_string(), 'I');
+        map
+    }
 
     #[test]
     fn test_tests_run() {
@@ -330,27 +389,81 @@ mod tests {
     #[test]
     fn test_extract_unit_val_gold() {
         let gold_unit = "glob prok Gold is 57800 Credits";
-        let expected = ("Gold".to_string(), 57800.0/4.0);
-        let result = extract_unit_values_from_sentence(gold_unit);
+        let testmap = create_testmap();
+        let expected = ("Gold".to_string(), 57800.0 / 4.0);
+        let result = extract_unit_values_from_sentence(&testmap, gold_unit);
         assert_eq!(Some(expected), result)
     }
 
     #[test]
     fn test_extract_unit_val_iron() {
         let iron_unit = "pish pish Iron is 3910 Credits";
-        let expected = ("Iron".to_string(), 3910.0/20.0);
-        let result = extract_unit_values_from_sentence(iron_unit);
+        let testmap = create_testmap();
+        let expected = ("Iron".to_string(), 3910.0 / 20.0);
+        let result = extract_unit_values_from_sentence(&testmap, iron_unit);
         assert_eq!(Some(expected), result)
     }
 
     #[test]
     fn test_extract_unit_values_silver() {
         let silver_unit = "glob glob Silver is 34 Credits";
-        let expected = ("Silver".to_string(), 34.0/2.0);
-        let result = extract_unit_values_from_sentence(silver_unit);
+        let testmap = create_testmap();
+        let expected = ("Silver".to_string(), 34.0 / 2.0);
+        let result = extract_unit_values_from_sentence(&testmap,silver_unit);
         assert_eq!(Some(expected), result)
     }
-    //todo integration tests
 
+    #[test]
+    fn test_extract_amount_gold() {
+        let gold_unit = "glob prok Gold is 57800 Credits";
+        let expected = 4;
+        let testmap = create_testmap();
+        let result = extract_amounts_from_sentence(&testmap, gold_unit);
+        assert_eq!(Some(expected), result)
+    }
+    #[test]
 
+    fn test_extract_amount_silver() {
+        let silver_unit = "glob glob Silver is 34 Credits";
+        let expected = 2;
+        let testmap = create_testmap();
+        let result = extract_amounts_from_sentence(&testmap, silver_unit);
+        assert_eq!(Some(expected), result)
+    }
+
+    #[test]
+    fn test_extract_amount_iron() {
+        let iron_unit = "pish pish Iron is 3910 Credits";
+        let expected = 20;
+        let testmap = create_testmap();
+        let result = extract_amounts_from_sentence(&testmap, iron_unit);
+        assert_eq!(Some(expected), result)
+    }
+
+    #[test]
+    fn test_extract_unit_val_full_gold() {
+        let gold_unit = "glob prok Gold is 57800 Credits";
+        let testmap = create_testmap();
+        let expected = ("Gold".to_string(), 57800.0 / 4.0);
+        let result = extract_unit_values_from_sentence(&testmap, gold_unit);
+        assert_eq!(Some(expected), result)
+    }
+
+    #[test]
+    fn test_extract_unit_val_full_silver() {
+        let silver_unit = "glob glob Silver is 34 Credits";
+        let testmap = create_testmap();
+        let expected = ("Silver".to_string(), 34.0 / 2.0);
+        let result = extract_unit_values_from_sentence(&testmap, silver_unit);
+        assert_eq!(Some(expected), result)
+    }
+
+    #[test]
+    fn test_extract_unit_val_full_iron() {
+        let iron_unit = "pish pish Iron is 3910 Credits";
+        let expected = ("Iron".to_string(), 3910.0 / 20.0);
+        let testmap = create_testmap();
+        let result = extract_unit_values_from_sentence(&testmap,iron_unit);
+        assert_eq!(Some(expected), result)
+    }
 }
