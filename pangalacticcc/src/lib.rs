@@ -101,11 +101,12 @@ pub fn run(config: Config) -> PccResult<()> {
     //   -> answering questions "how much is $amount" possible [x]
     // - extract units from input [x]
     // - calculate conversion rate 1 $unit <-> N Credits [x]
-    //   -> answering questions "how many Credits is $amount $unit ?" possible
+    //   -> answering questions "how many Credits is $amount $unit ?" possible [x]
     // check for invalid inputs
 
     Ok(())
 }
+
 pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) -> String {
     // how much is pish tegj glob glob ?
     // -> pish tegj glob glob is 42
@@ -144,9 +145,6 @@ pub fn answer_how_many_credits(
 ) -> String {
     // how many Credits is glob prok Iron ?
     // -> glob prok Iron is 782 Credits
-    //let mut orig: Vec<String> = Vec::new();
-    //let mut numerals: Vec<String> = Vec::new();
-    //for word in question.split("how many Credits is ") {
 
     // todo refactor
     let mut amount_unit = question
@@ -157,22 +155,26 @@ pub fn answer_how_many_credits(
         .map(|x| x.trim_end())
         .collect::<Vec<_>>();
 
-
     let mut amount = amount_unit[0].split(" ").collect::<Vec<_>>();
     let unit = &amount.pop().unwrap();
 
-    let roman_number = amount.iter().filter_map(|x|numeral_mapping.get(*x)).collect::<String>(); // todo
-    println!("{:?}, {:?} {:?} units: {:?}", amount, roman_number, numeral_mapping, unit_mapping);
-    if let Some(value) = unit_mapping.get(*unit){
-        if let Ok(amount_parsed) = roman_number.parse::<Roman>(){
-            return  format!("{} {} is {} Credits", amount.join(" "), unit,amount_parsed.value as f64 *value )
-        }
+    let roman_number = amount
+        .iter()
+        .filter_map(|x| numeral_mapping.get(*x))
+        .collect::<String>(); // todo
 
+    if let Some(value) = unit_mapping.get(*unit) {
+        if let Ok(amount_parsed) = roman_number.parse::<Roman>() {
+            return format!(
+                "{} {} is {} Credits",
+                amount.join(" "),
+                unit,
+                amount_parsed.value as f64 * value
+            );
+        }
     }
     "I have no idea what you are talking about".to_string() //todo err
 }
-
-
 
 pub fn open(path: &String) -> PccResult<Box<dyn BufRead>> {
     if path == "-" {
@@ -224,8 +226,9 @@ mod tests {
         let result = answer_how_much(&hm, question);
         assert_eq!(expected, result)
     }
+
     #[test]
-    fn test_answer_how_many_example_86() {
+    fn test_answer_how_many_example_silver_86() {
         let mut nm: HashMap<String, char> = HashMap::new();
         nm.insert("glob".to_string(), 'I');
         nm.insert("prok".to_string(), 'V');
@@ -233,6 +236,32 @@ mod tests {
         um.insert("Silver".to_string(), 21.5);
         let question = "how many Credits is glob prok Silver ?";
         let expected = "glob prok Silver is 86 Credits";
+        let result = answer_how_many_credits(&nm, &um, question);
+        assert_eq!(expected, result)
+    }
+
+    #[test]
+    fn test_answer_how_many_example_gold_57800() {
+        let mut nm: HashMap<String, char> = HashMap::new();
+        nm.insert("glob".to_string(), 'I');
+        nm.insert("prok".to_string(), 'V');
+        let mut um: HashMap<String, f64> = HashMap::new();
+        um.insert("Gold".to_string(), 14450.0);
+        let question = "how many Credits is glob prok Gold ?";
+        let expected = "glob prok Gold is 57800 Credits";
+        let result = answer_how_many_credits(&nm, &um, question);
+        assert_eq!(expected, result)
+    }
+
+    #[test]
+    fn test_answer_how_many_example_iron_782() {
+        let mut nm: HashMap<String, char> = HashMap::new();
+        nm.insert("glob".to_string(), 'I');
+        nm.insert("prok".to_string(), 'V');
+        let mut um: HashMap<String, f64> = HashMap::new();
+        um.insert("Iron".to_string(), 195.5);
+        let question = "how many Credits is glob prok Iron ?";
+        let expected = "glob prok Iron is 782 Credits";
         let result = answer_how_many_credits(&nm, &um, question);
         assert_eq!(expected, result)
     }
