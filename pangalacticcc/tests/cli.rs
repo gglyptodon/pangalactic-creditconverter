@@ -67,7 +67,6 @@ fn test_input1() -> TestResult {
 }
 
 #[test]
-#[ignore]
 fn test_input1_stdin() -> TestResult {
     run_stdin(INPUT1, &[], OUTPUT1)
 }

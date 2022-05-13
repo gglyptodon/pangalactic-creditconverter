@@ -8,10 +8,10 @@ use crate::textprocessing::{
 };
 
 use clap::{Arg, Command};
-use regex::Regex;
+//use regex::Regex;
 use std::collections::HashMap;
 use std::error::Error;
-use std::fmt::{Display, Formatter};
+//use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::io::{BufRead, Read};
 
@@ -225,7 +225,6 @@ pub fn open(path: &str) -> PccResult<Box<dyn BufRead>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::roman::ParseRomanNumeralError;
 
     #[test]
     fn test_answer_how_much_example_42() {

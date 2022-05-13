@@ -3,61 +3,45 @@ use regex::Regex;
 use std::collections::HashMap;
 
 pub fn is_question_how_much(sentence: &str) -> bool {
-    /// example: how much is pish tegj glob glob ?
-    if sentence.starts_with("how much is") && sentence.ends_with("?") {
-        true
-    } else {
-        false
-    }
+    // example: how much is pish tegj glob glob ?
+    sentence.starts_with("how much is") && sentence.ends_with('?')
 }
 
 pub fn is_question_how_many_credits(sentence: &str) -> bool {
-    /// example: how many Credits is glob prok Silver ?
-    if sentence.starts_with("how many Credits is") && sentence.ends_with("?") {
-        true
-    } else {
-        false
-    }
+    // example: how many Credits is glob prok Silver ?
+    sentence.starts_with("how many Credits is") && sentence.ends_with('?')
 }
 
 pub fn is_unit_info(sentence: &str) -> bool {
-    //todo: make more specific
-    /// example: glob prok Gold is 57800 Credits -> true
-    if sentence.ends_with("Credits") {
-        true
-    } else {
-        false
-    }
+    // todo: make more specific
+    // example: glob prok Gold is 57800 Credits -> true
+    sentence.ends_with("Credits")
 }
 
 pub fn is_numeral_info(sentence: &str) -> bool {
-    /// example: pish is X -> true
+    // example: pish is X -> true
     if sentence.is_empty() {
         return false;
     }
     // sentence ends on roman numeral
-    if roman::ROMAN_VALUES.contains_key(&sentence.chars().last().unwrap()) {
-        true
-    } else {
-        false
-    }
+    roman::ROMAN_VALUES.contains_key(&sentence.chars().last().unwrap())
 }
 
 pub fn extract_units_from_sentence(sentence: &str) -> Option<String> {
     // assuming Credits is agreed upon
-    /// example input: glob prok Iron is 782 Credits
+    // example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
-    if let Some(captures) = unit_regex.captures(&sentence) {
+    if let Some(captures) = unit_regex.captures(sentence) {
         let result = captures
             .iter()
-            .map(|m| m.unwrap().as_str().to_string().clone())
+            .map(|m| m.unwrap().as_str().to_string())
             .collect::<Vec<_>>();
         // capture group 0 is always entire match,
         // group 1: $amount $unit, group 2: $amount_arabic_numerals
         if result.len() != 3 {
             return None;
         }
-        let unit = result.get(1).unwrap().split(" ").last().unwrap();
+        let unit = result.get(1).unwrap().split(' ').last().unwrap();
         return Some(unit.to_string());
     }
     None
@@ -68,19 +52,19 @@ pub fn extract_amounts_from_sentence(
     sentence: &str,
 ) -> Option<i32> {
     // assuming Credits is agreed upon
-    /// example input: glob prok Iron is 782 Credits
+    // example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
-    if let Some(captures) = unit_regex.captures(&sentence) {
+    if let Some(captures) = unit_regex.captures(sentence) {
         let result = captures
             .iter()
-            .map(|m| m.unwrap().as_str().to_string().clone())
+            .map(|m| m.unwrap().as_str().to_string())
             .collect::<Vec<_>>();
         // capture group 0 is always entire match,
         // group 1: $amount $unit, group 2: $amount_arabic_numerals
         if result.len() != 3 {
             return None;
         }
-        let mut amount = result.get(1).unwrap().split(" ").collect::<Vec<_>>();
+        let mut amount = result.get(1).unwrap().split(' ').collect::<Vec<_>>();
         amount.pop(); //discard last element which should be the unit
         if let Ok(roman) = amount
             .iter()
@@ -97,12 +81,12 @@ pub fn extract_amounts_from_sentence(
 
 pub fn extract_amount_credits_from_sentence(sentence: &str) -> Option<i32> {
     // assuming Credits is agreed upon
-    /// example input: glob prok Iron is 782 Credits
+    // example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
-    if let Some(captures) = unit_regex.captures(&sentence) {
+    if let Some(captures) = unit_regex.captures(sentence) {
         let result = captures
             .iter()
-            .map(|m| m.unwrap().as_str().to_string().clone())
+            .map(|m| m.unwrap().as_str().to_string())
             .collect::<Vec<_>>();
         // capture group 0 is always entire match,
         // group 1: $amount $unit, group 2: $amount_arabic_numerals
@@ -123,7 +107,7 @@ pub fn extract_unit_values_from_sentence(
     numeral_map: &HashMap<String, char>,
     sentence: &str,
 ) -> Option<(String, f64)> {
-    if let Some(amount) = extract_amounts_from_sentence(&numeral_map, sentence) {
+    if let Some(amount) = extract_amounts_from_sentence(numeral_map, sentence) {
         if let Some(unit) = extract_units_from_sentence(sentence) {
             if let Some(num_credits) = extract_amount_credits_from_sentence(sentence) {
                 return Some((unit, num_credits as f64 / amount as f64));
@@ -135,10 +119,10 @@ pub fn extract_unit_values_from_sentence(
 
 pub fn numerals_to_roman(sentence: &str) -> Option<(String, String)> {
     let numeral_regex = Regex::new(r"^(\w+) is ([IVXLCDM])$").unwrap();
-    if let Some(mapping) = numeral_regex.captures(&sentence) {
+    if let Some(mapping) = numeral_regex.captures(sentence) {
         let result = mapping
             .iter()
-            .map(|m| m.unwrap().as_str().to_string().clone())
+            .map(|m| m.unwrap().as_str().to_string())
             .collect::<Vec<_>>();
         // capture group 0 is always entire match,
         // the other two should be found in a valid sentence
