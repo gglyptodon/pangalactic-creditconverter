@@ -17,6 +17,8 @@ lazy_static! {
     };
 }
 
+/// Occurs when the input could not be converted to Roman,
+/// e.g. due to characters being invalid or in unsupported order.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ParseRomanNumeralError;
 
@@ -26,11 +28,15 @@ impl Display for ParseRomanNumeralError {
     }
 }
 
+/// Represents a Roman number
 #[derive(Debug)]
 pub struct Roman {
+    /// value represented in Roman numerals
     pub(crate) repr: String,
+    /// value as integer
     pub(crate) value: i32,
 }
+
 
 impl Display for Roman {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -40,6 +46,8 @@ impl Display for Roman {
 
 // from integer to Roman numeral
 impl From<u32> for Roman {
+    ///  converts from unsigned integer to Roman
+    ///  if num is within bounds 0<=num<4000
     fn from(num: u32) -> Self {
         if num >= 4000 {
             panic!(
