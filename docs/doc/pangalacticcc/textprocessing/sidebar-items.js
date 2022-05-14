@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["extract_amount_credits_from_sentence",""],["extract_amounts_from_sentence",""],["extract_unit_values_from_sentence",""],["extract_units_from_sentence",""],["is_numeral_info",""],["is_question_how_many_credits",""],["is_question_how_much",""],["is_unit_info",""],["numerals_to_roman",""]]});
