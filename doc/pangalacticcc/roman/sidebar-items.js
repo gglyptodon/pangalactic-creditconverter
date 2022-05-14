@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ParseRomanNumeralError","Occurs when the input could not be converted to Roman, e.g. due to characters being invalid or in unsupported order."],["ROMAN_VALUES",""],["Roman","Represents a Roman number"]]});

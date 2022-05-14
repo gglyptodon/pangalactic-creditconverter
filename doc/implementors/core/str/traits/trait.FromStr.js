@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["pangalacticcc"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.60.0/core/str/traits/trait.FromStr.html\" title=\"trait core::str::traits::FromStr\">FromStr</a> for <a class=\"struct\" href=\"pangalacticcc/roman/struct.Roman.html\" title=\"struct pangalacticcc::roman::Roman\">Roman</a>","synthetic":false,"types":["pangalacticcc::roman::Roman"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
