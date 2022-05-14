@@ -1,37 +1,71 @@
-use crate::{roman, Roman};
 use regex::Regex;
 use std::collections::HashMap;
+use crate::Roman;
 
+/// Returns true if questions asks how much is
+/// # Example
+/// ```
+/// use pangalacticcc::textprocessing::is_question_how_much;
+/// assert_eq!(is_question_how_much("How much is da Fish ?"), true)
+/// ```
 pub fn is_question_how_much(sentence: &str) -> bool {
     // example: how much is pish tegj glob glob ?
-    sentence.starts_with("how much is") && sentence.ends_with('?')
+    sentence.to_lowercase().starts_with("how much is") && sentence.ends_with('?')
 }
+
+/// Returns true if questions asks for how many credits, and an alien numeral can be extracted
+/// # Example
+/// ```
+/// use pangalacticcc::textprocessing::is_question_how_many_credits;
+/// assert_eq!(is_question_how_many_credits("how many Credits is glob prok Silver ?"), true);
+/// assert_eq!(is_question_how_many_credits("How many Credits is da da da Fish ?"), true);
+/// ```
 
 pub fn is_question_how_many_credits(sentence: &str) -> bool {
-    // example: how many Credits is glob prok Silver ?
-    sentence.starts_with("how many Credits is") && sentence.ends_with('?')
+    sentence.to_lowercase().starts_with("how many credits is") && sentence.ends_with('?')
 }
 
+/// Returns true if sentence is statement about units, and a number of Credits can be extracted
+/// # Example
+/// ```
+/// use pangalacticcc::textprocessing::is_unit_info;
+/// assert_eq!(is_unit_info("glob prok Gold is 57800 Credits"), true);
+/// assert_eq!(is_unit_info("Da da da Fish is 3 Credits"), true);
+/// assert_eq!(is_unit_info("Da da da Fish is three Credits"), false);
+
+/// ```
 pub fn is_unit_info(sentence: &str) -> bool {
-    // todo: make more specific
-    // example: glob prok Gold is 57800 Credits -> true
-    sentence.ends_with("Credits")
+    extract_units_from_sentence(sentence) != None
 }
 
+/// Returns true if sentence is statement about numerals
+/// # Example
+/// ```
+/// use pangalacticcc::textprocessing::is_numeral_info;
+/// assert_eq!(is_numeral_info("da is I"), true);
+/// assert_eq!(is_numeral_info("pish is X"), true);
+/// assert_eq!(is_numeral_info("pish is IX"), false);
+/// assert_eq!(is_numeral_info("pish is A"), false);
+/// ```
 pub fn is_numeral_info(sentence: &str) -> bool {
-    // example: pish is X -> true
     if sentence.is_empty() {
         return false;
     }
-    // sentence ends on roman numeral
-    roman::ROMAN_VALUES.contains_key(&sentence.chars().last().unwrap())
+    numerals_to_roman(sentence) != None
 }
 
+/// Returns a unit extracted from a sentence about unit info or None if extraction failed.
+/// Sentences are expected to also have an amount stated directly before the unit.
+/// # Example
+/// ```
+/// use pangalacticcc::textprocessing::extract_units_from_sentence;
+/// assert_eq!(extract_units_from_sentence("glob prok Iron is 782 Credits"),Some("Iron".to_string()));
+/// assert_eq!(extract_units_from_sentence("Iron is 10 Credits"), None);
+/// ```
 pub fn extract_units_from_sentence(sentence: &str) -> Option<String> {
     // assuming Credits is agreed upon
-    // example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
-    if let Some(captures) = unit_regex.captures(sentence) {
+    if let Some(captures) = unit_regex.captures(sentence.trim_start().trim_end()) {
         let result = captures
             .iter()
             .map(|m| m.unwrap().as_str().to_string())
@@ -41,12 +75,29 @@ pub fn extract_units_from_sentence(sentence: &str) -> Option<String> {
         if result.len() != 3 {
             return None;
         }
-        let unit = result.get(1).unwrap().split(' ').last().unwrap();
+        let amount_unit = result.get(1).unwrap().split(' ').collect::<Vec<_>>();
+        // needs at least one numeral before unit
+        if amount_unit.len() < 2 {
+            return None;
+        }
+        let unit = amount_unit.last().unwrap();
         return Some(unit.to_string());
     }
     None
 }
 
+/// Returns a amount extracted from a sentence with numerals as integer or None if extraction failed.
+/// Sentences are expected to also have an amount stated directly before the unit.
+/// # Example
+/// ```
+/// use std::collections::HashMap;
+/// use pangalacticcc::textprocessing::extract_amounts_from_sentence;
+/// let mut nm:HashMap<String,char> = HashMap::new();
+/// nm.insert(String::from("glob"), 'I');
+/// nm.insert("prok".to_string(), 'V');
+/// assert_eq!(extract_amounts_from_sentence(&nm,"glob prok Iron is 782 Credits"), Some(4));
+/// assert_eq!(extract_amounts_from_sentence(&nm,"glob glob Fish is 2 Credits"),Some(2));
+/// ```
 pub fn extract_amounts_from_sentence(
     numeral_map: &HashMap<String, char>,
     sentence: &str,
@@ -54,7 +105,7 @@ pub fn extract_amounts_from_sentence(
     // assuming Credits is agreed upon
     // example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
-    if let Some(captures) = unit_regex.captures(sentence) {
+    if let Some(captures) = unit_regex.captures(sentence.trim_start().trim_end()) {
         let result = captures
             .iter()
             .map(|m| m.unwrap().as_str().to_string())
@@ -78,10 +129,15 @@ pub fn extract_amounts_from_sentence(
     }
     None
 }
-
+/// Returns a amount of Credits extracted from a sentence or None if extraction failed.
+/// # Example
+/// ```
+/// use std::collections::HashMap;
+/// use pangalacticcc::textprocessing::{extract_amount_credits_from_sentence};
+/// assert_eq!(extract_amount_credits_from_sentence("glob prok Iron is 782 Credits"), Some(782));
+/// assert_eq!(extract_amount_credits_from_sentence("glob glob Fish is 2 Credits"), Some(2));
+/// ```
 pub fn extract_amount_credits_from_sentence(sentence: &str) -> Option<i32> {
-    // assuming Credits is agreed upon
-    // example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
     if let Some(captures) = unit_regex.captures(sentence) {
         let result = captures
@@ -103,6 +159,22 @@ pub fn extract_amount_credits_from_sentence(sentence: &str) -> Option<i32> {
     None
 }
 
+/// Returns credit conversion rate for unit extracted from a sentence with numerals as (unit: String, value: f64) tuple or None if extraction failed.
+/// Sentences are expected to have an amount stated directly before the unit.
+/// # Example
+/// ```
+/// use std::collections::HashMap;
+/// use pangalacticcc::textprocessing::{extract_unit_values_from_sentence};
+/// let mut nm:HashMap<String,char> = HashMap::new();
+/// nm.insert(String::from("glob"), 'I');
+/// nm.insert("prok".to_string(), 'V');
+/// assert_eq!(extract_unit_values_from_sentence(
+///     &nm,"glob prok Iron is 782 Credits"),Some(("Iron".to_string(),195.5))
+/// );
+/// assert_eq!(extract_unit_values_from_sentence(
+///     &nm,"glob glob Fish is 2 Credits"), Some(("Fish".to_string(),1.0))
+/// );
+/// ```
 pub fn extract_unit_values_from_sentence(
     numeral_map: &HashMap<String, char>,
     sentence: &str,
@@ -117,6 +189,16 @@ pub fn extract_unit_values_from_sentence(
     None
 }
 
+/// Returns (alien_numeral, roman_numeral) tuple from a sentence with numerals
+/// or None if extraction failed.
+/// # Example
+/// ```
+/// use std::collections::HashMap;
+/// use pangalacticcc::textprocessing::{numerals_to_roman};
+/// assert_eq!(numerals_to_roman("glob is I"), Some(("glob".to_string(), "I".to_string())));
+/// assert_eq!(numerals_to_roman("pish is X"), Some(("pish".to_string(), "X".to_string())));
+/// assert_eq!(numerals_to_roman("pish is A"), None);
+/// ```
 pub fn numerals_to_roman(sentence: &str) -> Option<(String, String)> {
     let numeral_regex = Regex::new(r"^(\w+) is ([IVXLCDM])$").unwrap();
     if let Some(mapping) = numeral_regex.captures(sentence) {
@@ -140,7 +222,6 @@ pub fn numerals_to_roman(sentence: &str) -> Option<(String, String)> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::roman::Roman;
 
     const GLOB_I: &str = "glob is I";
     const PROK_V: &str = "prok is V";
