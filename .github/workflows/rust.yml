@@ -20,6 +20,12 @@ jobs:
       run: cargo build --manifest-path pangalacticcc/Cargo.toml --verbose
     - name: Run tests
       run: cargo test --manifest-path pangalacticcc/Cargo.toml --verbose
+  
     - name: Build docs 
       run: ./build_docs.sh
-      shell: bash
+      shell: bash 
+    - name: Deploy docs to pages 
+      uses: JamesIves/github-pages-deploy-action@v4.3.3
+      with:
+        branch: gh-pages # The branch the action should deploy to.
+        folder: docs 
