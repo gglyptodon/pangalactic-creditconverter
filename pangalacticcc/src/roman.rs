@@ -37,7 +37,6 @@ pub struct Roman {
     value: i32,
 }
 
-
 impl Display for Roman {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}:{}", self.repr, self.value)
@@ -129,6 +128,7 @@ impl From<u32> for Roman {
 
 impl FromStr for Roman {
     type Err = ParseRomanNumeralError;
+    /// Converts from &str to Roman.
     /// The symbols "I", "X", "C", and "M" can be repeated three times in succession, but no more.
     /// (They may appear four times if the third and fourth are separated by a smaller value, such as
     /// XXXIX.)
@@ -138,7 +138,20 @@ impl FromStr for Roman {
     /// "C" can be subtracted from "D" and "M" only.
     /// "V", "L", and "D" can never be subtracted.
     /// Only one small-value symbol may be subtracted from any large-value symbol.
-    ///
+    /// # Arguments
+    /// * `s` - String with Roman numerals
+    /// # Example
+    /// ```
+    /// use pangalacticcc::roman::{Roman, ParseRomanNumeralError};
+    /// let roman_xi: Roman = "XI".parse().unwrap();
+    /// assert_eq!(roman_xi.get_value(), 11);
+    /// assert_eq!(roman_xi.get_representation(),"XI");
+    /// let wont_work = match "IXI".parse::<Roman>() {
+    ///     Err(e) => e.to_string(),
+    ///     _ => "this should not work".to_string()
+    /// };
+    /// assert_eq!(wont_work, ParseRomanNumeralError.to_string())
+    /// ```
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
             return Err(ParseRomanNumeralError);
@@ -147,7 +160,6 @@ impl FromStr for Roman {
         if !s.chars().all(|c| ROMAN_VALUES.keys().any(|x| x == &c)) {
             return Err(ParseRomanNumeralError);
         }
-
         // a bit hacky...
         // Perform math on the input characters (e.g. add 10 for X
         // (or subtract 10 if followed by numeral for larger number, respectively) etc.
@@ -187,13 +199,13 @@ impl FromStr for Roman {
     }
 }
 
-impl Roman{
+impl Roman {
     /// Returns value as integer
-    pub fn get_value(&self)->i32{
+    pub fn get_value(&self) -> i32 {
         self.value
     }
     /// Returns representation in Roman numerals as String
-    pub fn get_representation(&self)->String{
+    pub fn get_representation(&self) -> String {
         self.repr.clone()
     }
 }
