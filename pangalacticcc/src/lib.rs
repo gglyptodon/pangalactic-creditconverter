@@ -161,7 +161,7 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
                     .to_string()
                     .parse::<Roman>()
                     .expect("something went wrong while parsing")
-                    .repr,
+                    .get_representation(),
             );
             orig.push(word.to_string());
         }
@@ -169,7 +169,7 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
 
     //println!("DEBUG: {:?} -> {:?}", orig, numerals);
     if let Ok(result) = numerals.join("").parse::<Roman>() {
-        format!("{} is {}", orig.join(" "), result.value)
+        format!("{} is {}", orig.join(" "), result.get_value())
     } else {
         "I have no idea what you are talking about".to_string() //todo err
     }
@@ -205,7 +205,7 @@ pub fn answer_how_many_credits(
                 "{} {} is {} Credits",
                 amount.join(" "),
                 unit,
-                amount_parsed.value as f64 * value
+                amount_parsed.get_value() as f64 * value
             );
         }
     }

@@ -32,9 +32,9 @@ impl Display for ParseRomanNumeralError {
 #[derive(Debug)]
 pub struct Roman {
     /// value represented in Roman numerals
-    pub(crate) repr: String,
+    repr: String,
     /// value as integer
-    pub(crate) value: i32,
+    value: i32,
 }
 
 
@@ -46,8 +46,17 @@ impl Display for Roman {
 
 // from integer to Roman numeral
 impl From<u32> for Roman {
-    ///  converts from unsigned integer to Roman
-    ///  if num is within bounds 0<=num<4000
+    /// Converts from unsigned integer to Roman
+    /// if num is within bounds 0<=num<4000
+    /// # Arguments
+    /// * `num` - unsigned int smaller than 4000
+    /// # Example
+    /// ```
+    /// use pangalacticcc::roman::Roman;
+    /// let roman_i = Roman::from(1);
+    /// assert_eq!(roman_i.get_value(), 1);
+    /// assert_eq!(roman_i.get_representation(),"I")
+    /// ```
     fn from(num: u32) -> Self {
         if num >= 4000 {
             panic!(
@@ -175,6 +184,17 @@ impl FromStr for Roman {
             repr: s.to_string(),
             value: sum,
         })
+    }
+}
+
+impl Roman{
+    /// Returns value as integer
+    pub fn get_value(&self)->i32{
+        self.value
+    }
+    /// Returns representation in Roman numerals as String
+    pub fn get_representation(&self)->String{
+        self.repr.clone()
     }
 }
 

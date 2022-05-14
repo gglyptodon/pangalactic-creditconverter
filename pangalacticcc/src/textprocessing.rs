@@ -73,7 +73,7 @@ pub fn extract_amounts_from_sentence(
             .join("")
             .parse::<Roman>()
         {
-            return Some(roman.value);
+            return Some(roman.get_value());
         }
     }
     None
@@ -257,7 +257,7 @@ mod tests {
         let mapping = numerals_to_roman(GLOB_I).unwrap();
         let r: Roman = mapping.1.parse().unwrap();
         //println!("{r}");
-        assert_eq!(r.value, 1)
+        assert_eq!(r.get_value(), 1)
     }
 
     #[test]
@@ -265,7 +265,7 @@ mod tests {
         let mapping = numerals_to_roman(PROK_V).unwrap();
         let r: Roman = mapping.1.parse().unwrap();
         //println!("{r}");
-        assert_eq!(r.value, 5)
+        assert_eq!(r.get_value(), 5)
     }
 
     #[test]
@@ -273,7 +273,7 @@ mod tests {
         let mapping = numerals_to_roman(PISH_X).unwrap();
         let r: Roman = mapping.1.parse().unwrap();
         //println!("{r}");
-        assert_eq!(r.value, 10)
+        assert_eq!(r.get_value(), 10)
     }
 
     #[test]
@@ -281,7 +281,7 @@ mod tests {
         let mapping = numerals_to_roman(TEGJ_L).unwrap();
         let r: Roman = mapping.1.parse().unwrap();
         //println!("{r}");
-        assert_eq!(r.value, 50)
+        assert_eq!(r.get_value(), 50)
     }
 
     #[test]
@@ -290,7 +290,7 @@ mod tests {
         let mapping = numerals_to_roman("bla is ?").unwrap();
         let r: Roman = mapping.1.parse().unwrap();
         //println!("{r}");
-        assert_eq!(r.value, 50)
+        assert_eq!(r.get_value(), 50)
     }
 
     #[test]
