@@ -117,14 +117,24 @@ pub fn extract_amounts_from_sentence(
         }
         let mut amount = result.get(1).unwrap().split(' ').collect::<Vec<_>>();
         amount.pop(); //discard last element which should be the unit
-        if let Ok(roman) = amount
+
+        let mapped = amount
             .iter()
-            .map(|x| numeral_map.get(*x).unwrap().to_string())
-            .collect::<Vec<_>>()
-            .join("")
-            .parse::<Roman>()
-        {
-            return Some(roman.get_value());
+            .filter_map(|x| numeral_map.get(*x))
+            .collect::<Vec<_>>();
+        // not all could be mapped -> return None
+        if mapped.len() != amount.len() {
+            return None;
+        } else {
+            let mut result = String::new();
+            for n in mapped {
+                result.push(*n);
+            }
+            return if let Ok(roman) = result.parse::<Roman>() {
+                Some(roman.get_value())
+            } else {
+                None
+            };
         }
     }
     None
