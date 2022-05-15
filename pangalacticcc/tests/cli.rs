@@ -12,6 +12,8 @@ const INPUT1: &str = "tests/input/input1.txt";
 const OUTPUT1: &str = "tests/expected/input1.txt.out";
 const INPUT1_REORDERED: &str = "tests/input/input1_reordered.txt";
 const OUTPUT1_REORDERED: &str = "tests/expected/input1_reordered.txt.out";
+const INPUT2: &str = "tests/input/input2.txt";
+const OUTPUT2: &str = "tests/expected/input2.txt.out";
 // test boilerplate
 fn gen_non_existing_file() -> String {
     loop {
@@ -75,4 +77,10 @@ fn test_input1_stdin() -> TestResult {
 #[test]
 fn test_input1_reordered() -> TestResult {
     run(&[INPUT1_REORDERED], OUTPUT1_REORDERED)
+}
+
+#[test]
+#[ignore]
+fn test_input2() -> TestResult {
+    run(&[INPUT2], OUTPUT2)
 }

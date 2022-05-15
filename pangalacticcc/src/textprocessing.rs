@@ -1,7 +1,21 @@
-use crate::Roman;
-use regex::Regex;
+use crate::{PccResult, Roman};
+use regex::{Regex};
 use std::collections::HashMap;
+use std::error;
+use std::error::Error;
+use std::fmt::{Display, Formatter};
 
+
+/// Occurs when the input could not be parsed,
+/// e.g. due to missing mappings.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ParseSentenceError;
+impl error::Error for ParseSentenceError{}
+impl Display for ParseSentenceError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "could not parse input")
+    }
+}
 /// Returns true if questions asks how much is
 /// # Example
 /// ```
@@ -95,13 +109,13 @@ pub fn extract_units_from_sentence(sentence: &str) -> Option<String> {
 /// let mut nm:HashMap<String,char> = HashMap::new();
 /// nm.insert(String::from("glob"), 'I');
 /// nm.insert("prok".to_string(), 'V');
-/// assert_eq!(extract_amounts_from_sentence(&nm,"glob prok Iron is 782 Credits"), Some(4));
-/// assert_eq!(extract_amounts_from_sentence(&nm,"glob glob Fish is 2 Credits"),Some(2));
+/// assert_eq!(extract_amounts_from_sentence(&nm,"glob prok Iron is 782 Credits").unwrap(), 4);
+/// assert_eq!(extract_amounts_from_sentence(&nm,"glob glob Fish is 2 Credits").unwrap(),2);
 /// ```
 pub fn extract_amounts_from_sentence(
     numeral_map: &HashMap<String, char>,
     sentence: &str,
-) -> Option<i32> {
+) -> PccResult<i32> {
     // assuming Credits is agreed upon
     // example input: glob prok Iron is 782 Credits
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
@@ -112,8 +126,9 @@ pub fn extract_amounts_from_sentence(
             .collect::<Vec<_>>();
         // capture group 0 is always entire match,
         // group 1: $amount $unit, group 2: $amount_arabic_numerals
+
         if result.len() != 3 {
-            return None;
+            return Err(ParseSentenceError.into())
         }
         let mut amount = result.get(1).unwrap().split(' ').collect::<Vec<_>>();
         amount.pop(); //discard last element which should be the unit
@@ -123,21 +138,20 @@ pub fn extract_amounts_from_sentence(
             .filter_map(|x| numeral_map.get(*x))
             .collect::<Vec<_>>();
         // not all could be mapped -> return None
-        if mapped.len() != amount.len() {
-            return None;
+        return if mapped.len() != amount.len() {
+            Err(ParseSentenceError.into()) //could not find all alien numerals in map
         } else {
             let mut result = String::new();
             for n in mapped {
                 result.push(*n);
             }
-            return if let Ok(roman) = result.parse::<Roman>() {
-                Some(roman.get_value())
-            } else {
-                None
-            };
+            if let Ok(roman) = result.parse::<Roman>() {
+                return Ok(roman.get_value() as i32)
+            }
+            Err(ParseSentenceError.into())
         }
     }
-    None
+    Err(ParseSentenceError.into())
 }
 /// Returns a amount of Credits extracted from a sentence or None if extraction failed.
 /// # Example
@@ -189,7 +203,7 @@ pub fn extract_unit_values_from_sentence(
     numeral_map: &HashMap<String, char>,
     sentence: &str,
 ) -> Option<(String, f64)> {
-    if let Some(amount) = extract_amounts_from_sentence(numeral_map, sentence) {
+    if let Ok(amount) = extract_amounts_from_sentence(numeral_map, sentence) {
         if let Some(unit) = extract_units_from_sentence(sentence) {
             if let Some(num_credits) = extract_amount_credits_from_sentence(sentence) {
                 return Some((unit, num_credits as f64 / amount as f64));
@@ -494,7 +508,7 @@ mod tests {
         let expected = 4;
         let testmap = create_testmap();
         let result = extract_amounts_from_sentence(&testmap, gold_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
     #[test]
 
@@ -503,7 +517,7 @@ mod tests {
         let expected = 2;
         let testmap = create_testmap();
         let result = extract_amounts_from_sentence(&testmap, silver_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 
     #[test]
@@ -512,7 +526,7 @@ mod tests {
         let expected = 20;
         let testmap = create_testmap();
         let result = extract_amounts_from_sentence(&testmap, iron_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 
     #[test]
@@ -521,7 +535,7 @@ mod tests {
         let testmap = create_testmap();
         let expected = ("Gold".to_string(), 57800.0 / 4.0);
         let result = extract_unit_values_from_sentence(&testmap, gold_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 
     #[test]
