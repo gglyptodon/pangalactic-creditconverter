@@ -1,3 +1,7 @@
+//! A helpful calculator for hitchiking merchants all across the galaxy and beyond.
+//! Converts alien numerals and units to Credits.
+//! Input is read from stdin or text file.
+//! Output is printed to stdout.
 extern crate core;
 
 pub mod roman;
