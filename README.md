@@ -61,14 +61,9 @@ OPTIONS:
   - <required_alien_numeral_i>  <optional_alien_numeral_j [...] optional_alien_numeral_z> <required_alien_unit> is <required_amount_in_arabic_numerals> Credits.
   - how much is <required_alien_numeral> <optional_alien_numeral_j [...] optional_alien_numeral_z> ?
   - how many Credits is <required_alien_numeral> <optional_alien_numeral_j [...] optional_alien_numeral_z> <required_alien_unit> ?
-- alien numerals can be repeated in the same sentence. 
-  - if the resulting number is invalid, an error message will be printed.
 - empty lines will be ignored    
 - anything that does not fit the above structure will be responded to with ``I have no idea what you are talking about`` unless a more specific response can be applied.
-- if the necessary information is not available, an error message will be printed.
+- any question that cannot be answered will be responded to with the above response, too.
 - input lines can be in any order, e.g. it is ok if questions come first.
-- output will be printed in the following order:
-  - answers to ``how much ...?`` questions 
-  - answers to ``how many Credits ...?`` questions
-  - responses to phrases that could not be processed
-
+- output will be printed in the order the questions are asked
+ 
