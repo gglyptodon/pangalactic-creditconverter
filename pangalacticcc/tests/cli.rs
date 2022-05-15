@@ -80,7 +80,6 @@ fn test_input1_reordered() -> TestResult {
 }
 
 #[test]
-#[ignore]
 fn test_input2() -> TestResult {
     run(&[INPUT2], OUTPUT2)
 }
