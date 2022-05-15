@@ -192,7 +192,7 @@ pub fn extract_amount_credits_from_sentence(sentence: &str) -> Option<i32> {
     None
 }
 
-/// Returns credit conversion rate for unit extracted from a sentence with numerals as (unit: String, value: f64) tuple or None if extraction failed.
+/// Returns Result for credit conversion rate for unit extracted from a sentence with numerals as (unit: String, value: f64) tuple or an Error if extraction failed.
 /// Sentences are expected to have an amount stated directly before the unit.
 /// # Example
 /// ```
@@ -202,10 +202,10 @@ pub fn extract_amount_credits_from_sentence(sentence: &str) -> Option<i32> {
 /// nm.insert(String::from("glob"), 'I');
 /// nm.insert("prok".to_string(), 'V');
 /// assert_eq!(extract_unit_values_from_sentence(
-///     &nm,"glob prok Iron is 782 Credits"),Some(("Iron".to_string(),195.5))
+///     &nm,"glob prok Iron is 782 Credits").unwrap(),("Iron".to_string(),195.5)
 /// );
 /// assert_eq!(extract_unit_values_from_sentence(
-///     &nm,"glob glob Fish is 2 Credits"), Some(("Fish".to_string(),1.0))
+///     &nm,"glob glob Fish is 2 Credits").unwrap(), ("Fish".to_string(),1.0)
 /// );
 /// ```
 pub fn extract_unit_values_from_sentence(
