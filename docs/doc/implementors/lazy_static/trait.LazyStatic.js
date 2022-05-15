@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["pangalacticcc"] = [{"text":"impl <a class=\"trait\" href=\"https://docs.rs/lazy_static/1.4.0/lazy_static/trait.LazyStatic.html\" title=\"trait lazy_static::LazyStatic\">LazyStatic</a> for <a class=\"struct\" href=\"pangalacticcc/roman/struct.ROMAN_VALUES.html\" title=\"struct pangalacticcc::roman::ROMAN_VALUES\">ROMAN_VALUES</a>","synthetic":false,"types":["pangalacticcc::roman::ROMAN_VALUES"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
