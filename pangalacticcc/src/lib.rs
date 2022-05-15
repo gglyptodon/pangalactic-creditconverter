@@ -1,12 +1,17 @@
+extern crate core;
+
 pub mod roman;
 pub mod textprocessing;
 
 use crate::roman::Roman;
 use crate::textprocessing::{
-    is_numeral_info, is_question_how_many_credits, is_question_how_much, is_unit_info,
-    numerals_to_roman,
+    extract_unit_values_from_sentence, is_numeral_info, is_question_how_many_credits,
+    is_question_how_much, is_unit_info, numerals_to_roman,
 };
 
+use crate::StatementKind::{
+    HowManyQuestion, HowMuchQuestion, NumeralStatement, Uncategorized, UnitStatement,
+};
 use clap::{Arg, Command};
 use std::collections::HashMap;
 use std::error::Error;
@@ -23,6 +28,20 @@ pub struct Config {
     /// path to the input file with the gathered information.
     /// If path is "-", input will be read from stdin.
     path: String,
+}
+#[derive(Debug, PartialEq)]
+enum StatementKind {
+    HowMuchQuestion,
+    HowManyQuestion,
+    UnitStatement,
+    NumeralStatement,
+    Uncategorized,
+}
+
+#[derive(Debug)]
+struct InputStatement {
+    kind: StatementKind,
+    text: String,
 }
 
 /// Parses command line arguments
@@ -72,76 +91,76 @@ pub fn run(config: Config) -> PccResult<()> {
         .map(|x| x.trim_end().trim_start())
         .collect::<Vec<_>>();
 
-    // collect statements about alien numerals
-    let numeral_info = contents
-        .iter()
-        .filter(|x| is_numeral_info(x))
-        .collect::<Vec<_>>();
-
-    // collect statements about alien units
-    let unit_info = contents
-        .iter()
-        .filter(|x| is_unit_info(x))
-        .collect::<Vec<_>>();
-
-    // collect questions how much is $sequence_of_alien_numerals
-    let how_much_questions = contents
-        .iter()
-        .filter(|x| is_question_how_much(x))
-        .collect::<Vec<_>>();
-
-    // collect questions how many credits is $sequence_of_alien_numerals $alien_unit
-    let how_many_credits_questions = contents
-        .iter()
-        .filter(|x| is_question_how_many_credits(x))
-        .collect::<Vec<_>>();
-
-    // collect anything else that doesn't match the other patterns
-    let uncategorized = contents
-        .iter()
-        .filter(|x| {
-            !is_numeral_info(x)
-                && !is_unit_info(x)
-                && !is_question_how_much(x)
-                && !is_question_how_many_credits(x)
-                && !x.is_empty()
-        })
-        .collect::<Vec<_>>();
-
-    // init and populate alien numerals -> roman numerals mapping
-    let mut numeral_mapping: HashMap<String, char> = HashMap::new();
-    // todo:refactor
-    for x in numeral_info {
-        if let Some((k, v)) = numerals_to_roman(x) {
-            numeral_mapping.insert(k, v.parse().unwrap());
+    let mut statements: Vec<InputStatement> = Vec::new();
+    for statement in &contents {
+        // skip empty
+        if statement.is_empty() {
+            continue;
+        }
+        if is_numeral_info(statement) {
+            // collect statements about alien numerals
+            statements.push(InputStatement {
+                text: statement.to_string(),
+                kind: NumeralStatement,
+            });
+        } else if is_unit_info(statement) {
+            // collect statements about alien units
+            statements.push(InputStatement {
+                text: statement.to_string(),
+                kind: UnitStatement,
+            });
+        } else if is_question_how_many_credits(statement) {
+            // collect questions how many credits is <sequence_of_alien_numerals> <alien_unit>
+            statements.push(InputStatement {
+                text: statement.to_string(),
+                kind: HowManyQuestion,
+            })
+        } else if is_question_how_much(statement) {
+            // collect questions how much is <sequence_of_alien_numerals>
+            statements.push(InputStatement {
+                text: statement.to_string(),
+                kind: HowMuchQuestion,
+            })
+        } else {
+            // collect anything else that doesn't match the other patterns
+            statements.push(InputStatement {
+                text: statement.to_string(),
+                kind: Uncategorized,
+            })
         }
     }
 
+    // init and populate alien numerals -> roman numerals mapping
+    let mut numeral_mapping: HashMap<String, char> = HashMap::new();
+    for s in statements.iter().filter(|x| x.kind == NumeralStatement) {
+        if let Some((k, v)) = numerals_to_roman(&s.text) {
+            numeral_mapping.insert(k, v.parse().unwrap());
+        }
+    }
+    // init and populate alien units -> value as float (Credits)
     let mut unit_mapping: HashMap<String, f64> = HashMap::new();
-    for sentence in unit_info {
-        if let Some((k, v)) =
-            textprocessing::extract_unit_values_from_sentence(&numeral_mapping, sentence)
-        {
+    for s in statements.iter().filter(|x| x.kind == UnitStatement) {
+        if let Some((k, v)) = extract_unit_values_from_sentence(&numeral_mapping, &s.text) {
             unit_mapping.insert(k, v);
         }
     }
 
-    //todo: is order important?
-    for q in how_much_questions {
-        println!("{}", answer_how_much(&numeral_mapping, q));
+    // answer questions
+    for q in statements
+        .iter()
+        .filter(|x| x.kind != UnitStatement && x.kind != NumeralStatement)
+    {
+        if q.kind == HowMuchQuestion {
+            println!("{}", answer_how_much(&numeral_mapping, &q.text));
+        } else if q.kind == HowManyQuestion {
+            println!(
+                "{}",
+                answer_how_many_credits(&numeral_mapping, &unit_mapping, &q.text)
+            );
+        } else {
+            println!("{}", DEFAULT_RESPONSE);
+        }
     }
-    //todo: is order important?
-    for q in how_many_credits_questions {
-        println!(
-            "{}",
-            answer_how_many_credits(&numeral_mapping, &unit_mapping, q)
-        );
-    }
-    // todo: uncategorized
-    for _ in uncategorized {
-        println!("{}", DEFAULT_RESPONSE);
-    }
-
     Ok(())
 }
 
@@ -178,7 +197,6 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
         }
     }
 
-    //println!("DEBUG: {:?} -> {:?}", orig, numerals);
     if let Ok(result) = numerals.join("").parse::<Roman>() {
         format!("{} is {}", orig.join(" "), result.get_value())
     } else {
