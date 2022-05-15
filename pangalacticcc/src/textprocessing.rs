@@ -1,6 +1,6 @@
+use crate::Roman;
 use regex::Regex;
 use std::collections::HashMap;
-use crate::Roman;
 
 /// Returns true if questions asks how much is
 /// # Example

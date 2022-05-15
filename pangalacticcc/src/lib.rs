@@ -8,18 +8,14 @@ use crate::textprocessing::{
 };
 
 use clap::{Arg, Command};
-//use regex::Regex;
 use std::collections::HashMap;
 use std::error::Error;
-//use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::io::{BufRead, Read};
 
 type PccResult<T> = Result<T, Box<dyn Error>>;
 
 const DEFAULT_RESPONSE: &str = "I have no idea what you are talking about";
-
-
 
 /// Holds the path of the file to be processed as String.
 #[derive(Debug)]
@@ -53,7 +49,6 @@ pub fn get_args() -> PccResult<Config> {
 /// Runs the program on provided config.
 /// Output is printed to stdout
 pub fn run(config: Config) -> PccResult<()> {
-
     // outline
     // - extract statements and questions [x]
     // - convert numerals from input to roman numerals [x]
@@ -228,9 +223,9 @@ pub fn answer_how_many_credits(
         .map(|x| x.trim_end())
         .collect::<Vec<_>>();
 
-    let mut amount = match amount_unit.get(0){
+    let mut amount = match amount_unit.get(0) {
         None => return default,
-        Some(a) => a.split(' ').collect::<Vec<_>>()
+        Some(a) => a.split(' ').collect::<Vec<_>>(),
     };
     let unit = &amount.pop().unwrap();
 
@@ -240,8 +235,8 @@ pub fn answer_how_many_credits(
         .collect::<String>();
 
     // return early if alien numeral could not be converted
-    if roman_number.len()!= amount.len(){
-        return default
+    if roman_number.len() != amount.len() {
+        return default;
     }
 
     if let Some(value) = unit_mapping.get(*unit) {
@@ -257,11 +252,11 @@ pub fn answer_how_many_credits(
     default //todo err
 }
 
-/// Returns a BufReader for `path` on success. If `path` is `"-"`,
-/// # Arguments
-/// * `path` -  A file name or "-".
+/// Returns a BufReader for `path` on success.
 /// If `path` is `"-"`,  BufReader for stdin is returned,
 /// otherwise BufReader for file `path` is returned.
+/// # Arguments
+/// * `path` -  A file name or "-".
 pub fn open(path: &str) -> PccResult<Box<dyn BufRead>> {
     if path == "-" {
         // input is stdin
