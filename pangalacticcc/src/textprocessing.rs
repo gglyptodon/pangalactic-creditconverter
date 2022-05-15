@@ -4,7 +4,6 @@ use std::collections::HashMap;
 use std::error;
 use std::fmt::{Display, Formatter};
 
-
 /// Occurs when the input could not be parsed,
 /// e.g. due to missing mappings.
 #[derive(Debug, Clone, PartialEq)]
@@ -15,6 +14,17 @@ impl Display for ParseSentenceError {
         write!(f, "could not parse input")
     }
 }
+
+/// Occurs when alien numeral could not be mapped
+#[derive(Debug, Clone, PartialEq)]
+pub struct MapAlienNumeralError;
+impl error::Error for MapAlienNumeralError{}
+impl Display for MapAlienNumeralError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "could not map alien numeral")
+    }
+}
+
 /// Returns true if questions asks how much is
 /// # Example
 /// ```
@@ -138,7 +148,7 @@ pub fn extract_amounts_from_sentence(
             .collect::<Vec<_>>();
         // not all could be mapped -> return None
         return if mapped.len() != amount.len() {
-            Err(ParseSentenceError.into()) //could not find all alien numerals in map
+            Err(MapAlienNumeralError.into()) //could not find all alien numerals in map
         } else {
             let mut result = String::new();
             for n in mapped {
@@ -201,15 +211,15 @@ pub fn extract_amount_credits_from_sentence(sentence: &str) -> Option<i32> {
 pub fn extract_unit_values_from_sentence(
     numeral_map: &HashMap<String, char>,
     sentence: &str,
-) -> Option<(String, f64)> {
+) -> PccResult<(String, f64)> {
     if let Ok(amount) = extract_amounts_from_sentence(numeral_map, sentence) {
         if let Ok(unit) = extract_units_from_sentence(sentence) {
             if let Some(num_credits) = extract_amount_credits_from_sentence(sentence) {
-                return Some((unit, num_credits as f64 / amount as f64));
+                return Ok((unit, num_credits as f64 / amount as f64));
             }
         }
     }
-    None
+    Err(ParseSentenceError.into())
 }
 
 /// Returns (alien_numeral, roman_numeral) tuple from a sentence with numerals
@@ -480,7 +490,7 @@ mod tests {
         let testmap = create_testmap();
         let expected = ("Gold".to_string(), 57800.0 / 4.0);
         let result = extract_unit_values_from_sentence(&testmap, gold_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 
     #[test]
@@ -489,7 +499,7 @@ mod tests {
         let testmap = create_testmap();
         let expected = ("Iron".to_string(), 3910.0 / 20.0);
         let result = extract_unit_values_from_sentence(&testmap, iron_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 
     #[test]
@@ -498,7 +508,7 @@ mod tests {
         let testmap = create_testmap();
         let expected = ("Silver".to_string(), 34.0 / 2.0);
         let result = extract_unit_values_from_sentence(&testmap, silver_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 
     #[test]
@@ -543,7 +553,7 @@ mod tests {
         let testmap = create_testmap();
         let expected = ("Silver".to_string(), 34.0 / 2.0);
         let result = extract_unit_values_from_sentence(&testmap, silver_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 
     #[test]
@@ -552,6 +562,6 @@ mod tests {
         let expected = ("Iron".to_string(), 3910.0 / 20.0);
         let testmap = create_testmap();
         let result = extract_unit_values_from_sentence(&testmap, iron_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 }

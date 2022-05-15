@@ -140,7 +140,7 @@ pub fn run(config: Config) -> PccResult<()> {
     // init and populate alien units -> value as float (Credits)
     let mut unit_mapping: HashMap<String, f64> = HashMap::new();
     for s in statements.iter().filter(|x| x.kind == UnitStatement) {
-        if let Some((k, v)) = extract_unit_values_from_sentence(&numeral_mapping, &s.text) {
+        if let Ok((k, v)) = extract_unit_values_from_sentence(&numeral_mapping, &s.text) {
             unit_mapping.insert(k, v);
         }
     }
