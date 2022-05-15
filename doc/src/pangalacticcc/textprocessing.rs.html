@@ -537,9 +537,65 @@
 <span id="532">532</span>
 <span id="533">533</span>
 <span id="534">534</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Roman</span>;
-<span class="kw">use</span> <span class="ident">regex::Regex</span>;
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">PccResult</span>, <span class="ident">Roman</span>};
+<span class="kw">use</span> <span class="ident">regex</span>::{<span class="ident">Regex</span>};
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
+<span class="kw">use</span> <span class="ident">std::error</span>;
+<span class="kw">use</span> <span class="ident">std::fmt</span>::{<span class="ident">Display</span>, <span class="ident">Formatter</span>};
+
+<span class="doccomment">/// Occurs when the input could not be parsed,</span>
+<span class="doccomment">/// e.g. due to missing mappings.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ParseSentenceError</span>;
+<span class="kw">impl</span> <span class="ident">error::Error</span> <span class="kw">for</span> <span class="ident">ParseSentenceError</span>{}
+<span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">ParseSentenceError</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;could not parse input&quot;</span>)
+    }
+}
+
+<span class="doccomment">/// Occurs when alien numeral could not be mapped</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MapAlienNumeralError</span>;
+<span class="kw">impl</span> <span class="ident">error::Error</span> <span class="kw">for</span> <span class="ident">MapAlienNumeralError</span>{}
+<span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">MapAlienNumeralError</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
+        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;could not map alien numeral&quot;</span>)
+    }
+}
 
 <span class="doccomment">/// Returns true if questions asks how much is</span>
 <span class="doccomment">/// # Example</span>
@@ -574,7 +630,7 @@
 
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_unit_info</span>(<span class="ident">sentence</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
-    <span class="ident">extract_units_from_sentence</span>(<span class="ident">sentence</span>) <span class="op">!</span><span class="op">=</span> <span class="prelude-val">None</span>
+    <span class="ident">extract_units_from_sentence</span>(<span class="ident">sentence</span>).<span class="ident">is_ok</span>()
 }
 
 <span class="doccomment">/// Returns true if sentence is statement about numerals</span>
@@ -593,15 +649,15 @@
     <span class="ident">numerals_to_roman</span>(<span class="ident">sentence</span>) <span class="op">!</span><span class="op">=</span> <span class="prelude-val">None</span>
 }
 
-<span class="doccomment">/// Returns a unit extracted from a sentence about unit info or None if extraction failed.</span>
-<span class="doccomment">/// Sentences are expected to also have an amount stated directly before the unit.</span>
+<span class="doccomment">/// Returns a Result with the unit extracted from a sentence about unit info or ParseSentenceError if extraction failed.</span>
+<span class="doccomment">/// Sentences are expected to have an amount stated directly before the unit.</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use pangalacticcc::textprocessing::extract_units_from_sentence;</span>
-<span class="doccomment">/// assert_eq!(extract_units_from_sentence(&quot;glob prok Iron is 782 Credits&quot;),Some(&quot;Iron&quot;.to_string()));</span>
-<span class="doccomment">/// assert_eq!(extract_units_from_sentence(&quot;Iron is 10 Credits&quot;), None);</span>
+<span class="doccomment">/// use pangalacticcc::textprocessing::{extract_units_from_sentence, ParseSentenceError};</span>
+<span class="doccomment">/// assert_eq!(extract_units_from_sentence(&quot;glob prok Iron is 782 Credits&quot;).unwrap(),&quot;Iron&quot;.to_string());</span>
+<span class="doccomment">/// assert_eq!(extract_units_from_sentence(&quot;Iron is 10 Credits&quot;).unwrap_err().to_string(), ParseSentenceError.to_string());</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_units_from_sentence</span>(<span class="ident">sentence</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_units_from_sentence</span>(<span class="ident">sentence</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">PccResult</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
     <span class="comment">// assuming Credits is agreed upon</span>
     <span class="kw">let</span> <span class="ident">unit_regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^([\w ]+) is (\d+) Credits$&quot;</span>).<span class="ident">unwrap</span>();
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">captures</span>) <span class="op">=</span> <span class="ident">unit_regex</span>.<span class="ident">captures</span>(<span class="ident">sentence</span>.<span class="ident">trim_start</span>().<span class="ident">trim_end</span>()) {
@@ -612,21 +668,21 @@
         <span class="comment">// capture group 0 is always entire match,</span>
         <span class="comment">// group 1: $amount $unit, group 2: $amount_arabic_numerals</span>
         <span class="kw">if</span> <span class="ident">result</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">3</span> {
-            <span class="kw">return</span> <span class="prelude-val">None</span>;
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>());
         }
         <span class="kw">let</span> <span class="ident">amount_unit</span> <span class="op">=</span> <span class="ident">result</span>.<span class="ident">get</span>(<span class="number">1</span>).<span class="ident">unwrap</span>().<span class="ident">split</span>(<span class="string">&#39; &#39;</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
         <span class="comment">// needs at least one numeral before unit</span>
         <span class="kw">if</span> <span class="ident">amount_unit</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">2</span> {
-            <span class="kw">return</span> <span class="prelude-val">None</span>;
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>());
         }
         <span class="kw">let</span> <span class="ident">unit</span> <span class="op">=</span> <span class="ident">amount_unit</span>.<span class="ident">last</span>().<span class="ident">unwrap</span>();
-        <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">unit</span>.<span class="ident">to_string</span>());
+        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">unit</span>.<span class="ident">to_string</span>());
     }
-    <span class="prelude-val">None</span>
+    <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>())
 }
 
-<span class="doccomment">/// Returns a amount extracted from a sentence with numerals as integer or None if extraction failed.</span>
-<span class="doccomment">/// Sentences are expected to also have an amount stated directly before the unit.</span>
+<span class="doccomment">/// Returns a Result with the amount extracted from a sentence with numerals as integer or ParseSententenceError if extraction failed.</span>
+<span class="doccomment">/// Sentences are expected to have an amount stated directly before the unit.</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use std::collections::HashMap;</span>
@@ -634,13 +690,13 @@
 <span class="doccomment">/// let mut nm:HashMap&lt;String,char&gt; = HashMap::new();</span>
 <span class="doccomment">/// nm.insert(String::from(&quot;glob&quot;), &#39;I&#39;);</span>
 <span class="doccomment">/// nm.insert(&quot;prok&quot;.to_string(), &#39;V&#39;);</span>
-<span class="doccomment">/// assert_eq!(extract_amounts_from_sentence(&amp;nm,&quot;glob prok Iron is 782 Credits&quot;), Some(4));</span>
-<span class="doccomment">/// assert_eq!(extract_amounts_from_sentence(&amp;nm,&quot;glob glob Fish is 2 Credits&quot;),Some(2));</span>
+<span class="doccomment">/// assert_eq!(extract_amounts_from_sentence(&amp;nm,&quot;glob prok Iron is 782 Credits&quot;).unwrap(), 4);</span>
+<span class="doccomment">/// assert_eq!(extract_amounts_from_sentence(&amp;nm,&quot;glob glob Fish is 2 Credits&quot;).unwrap(),2);</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_amounts_from_sentence</span>(
     <span class="ident">numeral_map</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">char</span><span class="op">&gt;</span>,
     <span class="ident">sentence</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">PccResult</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> {
     <span class="comment">// assuming Credits is agreed upon</span>
     <span class="comment">// example input: glob prok Iron is 782 Credits</span>
     <span class="kw">let</span> <span class="ident">unit_regex</span> <span class="op">=</span> <span class="ident">Regex::new</span>(<span class="string">r&quot;^([\w ]+) is (\d+) Credits$&quot;</span>).<span class="ident">unwrap</span>();
@@ -651,22 +707,32 @@
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
         <span class="comment">// capture group 0 is always entire match,</span>
         <span class="comment">// group 1: $amount $unit, group 2: $amount_arabic_numerals</span>
+
         <span class="kw">if</span> <span class="ident">result</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">3</span> {
-            <span class="kw">return</span> <span class="prelude-val">None</span>;
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>())
         }
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">amount</span> <span class="op">=</span> <span class="ident">result</span>.<span class="ident">get</span>(<span class="number">1</span>).<span class="ident">unwrap</span>().<span class="ident">split</span>(<span class="string">&#39; &#39;</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
         <span class="ident">amount</span>.<span class="ident">pop</span>(); <span class="comment">//discard last element which should be the unit</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">roman</span>) <span class="op">=</span> <span class="ident">amount</span>
+
+        <span class="kw">let</span> <span class="ident">mapped</span> <span class="op">=</span> <span class="ident">amount</span>
             .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">numeral_map</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">x</span>).<span class="ident">unwrap</span>().<span class="ident">to_string</span>())
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-            .<span class="ident">join</span>(<span class="string">&quot;&quot;</span>)
-            .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Roman</span><span class="op">&gt;</span>()
-        {
-            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">roman</span>.<span class="ident">get_value</span>());
+            .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">numeral_map</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">x</span>))
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+        <span class="comment">// not all could be mapped -&gt; return None</span>
+        <span class="kw">return</span> <span class="kw">if</span> <span class="ident">mapped</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">amount</span>.<span class="ident">len</span>() {
+            <span class="prelude-val">Err</span>(<span class="ident">MapAlienNumeralError</span>.<span class="ident">into</span>()) <span class="comment">//could not find all alien numerals in map</span>
+        } <span class="kw">else</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">String::new</span>();
+            <span class="kw">for</span> <span class="ident">n</span> <span class="kw">in</span> <span class="ident">mapped</span> {
+                <span class="ident">result</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">n</span>);
+            }
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">roman</span>) <span class="op">=</span> <span class="ident">result</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Roman</span><span class="op">&gt;</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">roman</span>.<span class="ident">get_value</span>() <span class="kw">as</span> <span class="ident">i32</span>)
+            }
+            <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>())
         }
     }
-    <span class="prelude-val">None</span>
+    <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>())
 }
 <span class="doccomment">/// Returns a amount of Credits extracted from a sentence or None if extraction failed.</span>
 <span class="doccomment">/// # Example</span>
@@ -698,7 +764,7 @@
     <span class="prelude-val">None</span>
 }
 
-<span class="doccomment">/// Returns credit conversion rate for unit extracted from a sentence with numerals as (unit: String, value: f64) tuple or None if extraction failed.</span>
+<span class="doccomment">/// Returns Result for credit conversion rate for unit extracted from a sentence with numerals as (unit: String, value: f64) tuple or an Error if extraction failed.</span>
 <span class="doccomment">/// Sentences are expected to have an amount stated directly before the unit.</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">/// ```</span>
@@ -708,24 +774,24 @@
 <span class="doccomment">/// nm.insert(String::from(&quot;glob&quot;), &#39;I&#39;);</span>
 <span class="doccomment">/// nm.insert(&quot;prok&quot;.to_string(), &#39;V&#39;);</span>
 <span class="doccomment">/// assert_eq!(extract_unit_values_from_sentence(</span>
-<span class="doccomment">///     &amp;nm,&quot;glob prok Iron is 782 Credits&quot;),Some((&quot;Iron&quot;.to_string(),195.5))</span>
+<span class="doccomment">///     &amp;nm,&quot;glob prok Iron is 782 Credits&quot;).unwrap(),(&quot;Iron&quot;.to_string(),195.5)</span>
 <span class="doccomment">/// );</span>
 <span class="doccomment">/// assert_eq!(extract_unit_values_from_sentence(</span>
-<span class="doccomment">///     &amp;nm,&quot;glob glob Fish is 2 Credits&quot;), Some((&quot;Fish&quot;.to_string(),1.0))</span>
+<span class="doccomment">///     &amp;nm,&quot;glob glob Fish is 2 Credits&quot;).unwrap(), (&quot;Fish&quot;.to_string(),1.0)</span>
 <span class="doccomment">/// );</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_unit_values_from_sentence</span>(
     <span class="ident">numeral_map</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">char</span><span class="op">&gt;</span>,
     <span class="ident">sentence</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">f64</span>)<span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">amount</span>) <span class="op">=</span> <span class="ident">extract_amounts_from_sentence</span>(<span class="ident">numeral_map</span>, <span class="ident">sentence</span>) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">unit</span>) <span class="op">=</span> <span class="ident">extract_units_from_sentence</span>(<span class="ident">sentence</span>) {
+) -&gt; <span class="ident">PccResult</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">f64</span>)<span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">amount</span>) <span class="op">=</span> <span class="ident">extract_amounts_from_sentence</span>(<span class="ident">numeral_map</span>, <span class="ident">sentence</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">unit</span>) <span class="op">=</span> <span class="ident">extract_units_from_sentence</span>(<span class="ident">sentence</span>) {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">num_credits</span>) <span class="op">=</span> <span class="ident">extract_amount_credits_from_sentence</span>(<span class="ident">sentence</span>) {
-                <span class="kw">return</span> <span class="prelude-val">Some</span>((<span class="ident">unit</span>, <span class="ident">num_credits</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> <span class="ident">amount</span> <span class="kw">as</span> <span class="ident">f64</span>));
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="ident">unit</span>, <span class="ident">num_credits</span> <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> <span class="ident">amount</span> <span class="kw">as</span> <span class="ident">f64</span>));
             }
         }
     }
-    <span class="prelude-val">None</span>
+    <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>())
 }
 
 <span class="doccomment">/// Returns (alien_numeral, roman_numeral) tuple from a sentence with numerals</span>
@@ -964,7 +1030,7 @@
         <span class="kw">let</span> <span class="ident">gold_unit</span> <span class="op">=</span> <span class="string">&quot;glob prok Gold is 57800 Credits&quot;</span>;
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;Gold&quot;</span>.<span class="ident">to_string</span>();
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_units_from_sentence</span>(<span class="ident">gold_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -972,7 +1038,7 @@
         <span class="kw">let</span> <span class="ident">iron_unit</span> <span class="op">=</span> <span class="string">&quot;pish pish Iron is 3910 Credits&quot;</span>;
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;Iron&quot;</span>.<span class="ident">to_string</span>();
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_units_from_sentence</span>(<span class="ident">iron_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -980,14 +1046,14 @@
         <span class="kw">let</span> <span class="ident">silver_unit</span> <span class="op">=</span> <span class="string">&quot;glob glob Silver is 34 Credits&quot;</span>;
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;Silver&quot;</span>.<span class="ident">to_string</span>();
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_units_from_sentence</span>(<span class="ident">silver_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_extract_unit_gold_none</span>() {
-        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+    <span class="kw">fn</span> <span class="ident">test_extract_unit_gold_err</span>() {
+        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="ident">ParseSentenceError</span>.<span class="ident">to_string</span>();
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_units_from_sentence</span>(<span class="ident">GLOB_I</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap_err</span>().<span class="ident">to_string</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -996,7 +1062,7 @@
         <span class="kw">let</span> <span class="ident">testmap</span> <span class="op">=</span> <span class="ident">create_testmap</span>();
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> (<span class="string">&quot;Gold&quot;</span>.<span class="ident">to_string</span>(), <span class="number">57800.0</span> <span class="op">/</span> <span class="number">4.0</span>);
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_unit_values_from_sentence</span>(<span class="kw-2">&amp;</span><span class="ident">testmap</span>, <span class="ident">gold_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1005,7 +1071,7 @@
         <span class="kw">let</span> <span class="ident">testmap</span> <span class="op">=</span> <span class="ident">create_testmap</span>();
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> (<span class="string">&quot;Iron&quot;</span>.<span class="ident">to_string</span>(), <span class="number">3910.0</span> <span class="op">/</span> <span class="number">20.0</span>);
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_unit_values_from_sentence</span>(<span class="kw-2">&amp;</span><span class="ident">testmap</span>, <span class="ident">iron_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1014,7 +1080,7 @@
         <span class="kw">let</span> <span class="ident">testmap</span> <span class="op">=</span> <span class="ident">create_testmap</span>();
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> (<span class="string">&quot;Silver&quot;</span>.<span class="ident">to_string</span>(), <span class="number">34.0</span> <span class="op">/</span> <span class="number">2.0</span>);
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_unit_values_from_sentence</span>(<span class="kw-2">&amp;</span><span class="ident">testmap</span>, <span class="ident">silver_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1023,7 +1089,7 @@
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="number">4</span>;
         <span class="kw">let</span> <span class="ident">testmap</span> <span class="op">=</span> <span class="ident">create_testmap</span>();
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_amounts_from_sentence</span>(<span class="kw-2">&amp;</span><span class="ident">testmap</span>, <span class="ident">gold_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
     <span class="attribute">#[<span class="ident">test</span>]</span>
 
@@ -1032,7 +1098,7 @@
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="number">2</span>;
         <span class="kw">let</span> <span class="ident">testmap</span> <span class="op">=</span> <span class="ident">create_testmap</span>();
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_amounts_from_sentence</span>(<span class="kw-2">&amp;</span><span class="ident">testmap</span>, <span class="ident">silver_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1041,7 +1107,7 @@
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="number">20</span>;
         <span class="kw">let</span> <span class="ident">testmap</span> <span class="op">=</span> <span class="ident">create_testmap</span>();
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_amounts_from_sentence</span>(<span class="kw-2">&amp;</span><span class="ident">testmap</span>, <span class="ident">iron_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1050,7 +1116,7 @@
         <span class="kw">let</span> <span class="ident">testmap</span> <span class="op">=</span> <span class="ident">create_testmap</span>();
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> (<span class="string">&quot;Gold&quot;</span>.<span class="ident">to_string</span>(), <span class="number">57800.0</span> <span class="op">/</span> <span class="number">4.0</span>);
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_unit_values_from_sentence</span>(<span class="kw-2">&amp;</span><span class="ident">testmap</span>, <span class="ident">gold_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1059,7 +1125,7 @@
         <span class="kw">let</span> <span class="ident">testmap</span> <span class="op">=</span> <span class="ident">create_testmap</span>();
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> (<span class="string">&quot;Silver&quot;</span>.<span class="ident">to_string</span>(), <span class="number">34.0</span> <span class="op">/</span> <span class="number">2.0</span>);
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_unit_values_from_sentence</span>(<span class="kw-2">&amp;</span><span class="ident">testmap</span>, <span class="ident">silver_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1068,7 +1134,7 @@
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> (<span class="string">&quot;Iron&quot;</span>.<span class="ident">to_string</span>(), <span class="number">3910.0</span> <span class="op">/</span> <span class="number">20.0</span>);
         <span class="kw">let</span> <span class="ident">testmap</span> <span class="op">=</span> <span class="ident">create_testmap</span>();
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">extract_unit_values_from_sentence</span>(<span class="kw-2">&amp;</span><span class="ident">testmap</span>, <span class="ident">iron_unit</span>);
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="ident">expected</span>), <span class="ident">result</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>.<span class="ident">unwrap</span>())
     }
 }
 </code></pre></div>
