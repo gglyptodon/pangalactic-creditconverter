@@ -205,7 +205,7 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
     if let Ok(result) = numerals.join("").parse::<Roman>() {
         format!("{} is {}", orig.join(" "), result.get_value())
     } else {
-        "I have no idea what you are talking about".to_string() //todo err
+        format!("I don't know how to interpret this number: {} -> {}", orig.join(" "), numerals.join(""))
     }
 }
 
@@ -326,7 +326,7 @@ mod tests {
         hm.insert("blub".to_string(), 'V');
         hm.insert("blubber".to_string(), 'L');
         let question = "how much is blub blubber ?"; // VL -> ParseRomanNumeralError
-        let expected = "I have no idea what you are talking about";
+        let expected = "I don't know how to interpret this number: blub blubber -> VL";
         let result = answer_how_much(&hm, question);
         assert_eq!(expected, result)
     }
