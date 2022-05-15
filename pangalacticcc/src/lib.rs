@@ -198,7 +198,7 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
 /// # Example
 /// ```
 /// use std::collections::HashMap;
-/// use pangalacticcc::{answer_how_many_credits, answer_how_much};
+/// use pangalacticcc::{answer_how_many_credits};
 /// let mut nm: HashMap<String, char> = HashMap::new();
 /// nm.insert("pish".to_string(), 'X');
 /// nm.insert("prok".to_string(), 'V');
@@ -257,6 +257,11 @@ pub fn answer_how_many_credits(
     default //todo err
 }
 
+/// Returns a BufReader for `path` on success. If `path` is `"-"`,
+/// # Arguments
+/// * `path` -  A file name or "-".
+/// If `path` is `"-"`,  BufReader for stdin is returned,
+/// otherwise BufReader for file `path` is returned.
 pub fn open(path: &str) -> PccResult<Box<dyn BufRead>> {
     if path == "-" {
         // input is stdin
