@@ -208,7 +208,7 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
 /// let q = "how many Credits is glob prok Iron ?";
 /// assert_eq!(answer_how_many_credits(&nm, &um, q),"glob prok Iron is 782 Credits".to_string());
 /// let q2 = "how many Credits is bla prok Iron ?";
-/// //assert_eq!(answer_how_many_credits(&nm, &um, q2),"I have no idea what you are talking about".to_string());
+/// assert_eq!(answer_how_many_credits(&nm, &um, q2),"I have no idea what you are talking about".to_string());
 /// let q3 = "how many Credits is glob prok Fish ?";
 /// assert_eq!(answer_how_many_credits(&nm, &um, q3),"I have no idea what you are talking about".to_string());
 ///
@@ -237,7 +237,12 @@ pub fn answer_how_many_credits(
     let roman_number = amount
         .iter()
         .filter_map(|x| numeral_mapping.get(*x))
-        .collect::<String>(); // todo
+        .collect::<String>();
+
+    // return early if alien numeral could not be converted
+    if roman_number.len()!= amount.len(){
+        return default
+    }
 
     if let Some(value) = unit_mapping.get(*unit) {
         if let Ok(amount_parsed) = roman_number.parse::<Roman>() {
