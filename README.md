@@ -8,10 +8,10 @@ A helpful calculator for hitchiking merchants all across the galaxy and beyond.
 - Input is read from stdin or text file.
 - Output is printed to stdout.
 
----
 You can find the crate's documentation generated from docstrings here:
-https://gglyptodon.github.io/pangalactic-creditconverter/doc/pangalacticcc/
----
+https://gglyptodon.github.io/pangalactic-creditconverter/
+
+----
 
 ### How to compile ###
 - follow instructions from https://www.rust-lang.org/tools/install for your operating system
