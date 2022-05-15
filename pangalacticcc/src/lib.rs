@@ -19,6 +19,9 @@ type PccResult<T> = Result<T, Box<dyn Error>>;
 
 const DEFAULT_RESPONSE: &str = "I have no idea what you are talking about";
 
+
+
+/// Holds the path of the file to be processed as String.
 #[derive(Debug)]
 pub struct Config {
     /// path to the input file with the gathered information.
@@ -26,6 +29,7 @@ pub struct Config {
     path: String,
 }
 
+/// Parses command line arguments
 pub fn get_args() -> PccResult<Config> {
     let matches = Command::new("pangalacticc")
         .about("Pangalactic Credit Converter")
@@ -43,17 +47,27 @@ pub fn get_args() -> PccResult<Config> {
 
     // we can safely unwrap here because we set a default
     let path = matches.value_of_lossy("input_path").unwrap().to_string();
-
     Ok(Config { path })
 }
 
-/// output is printed to stdout
+/// Runs the program on provided config.
+/// Output is printed to stdout
 pub fn run(config: Config) -> PccResult<()> {
-    //unimplemented!();
+
+    // outline
+    // - extract statements and questions [x]
+    // - convert numerals from input to roman numerals [x]
+    // - roman numerals -> values as decimal numbers in arabic numerals [x]
+    //   -> answering questions "how much is $amount" possible [x]
+    // - extract units from input [x]
+    // - calculate conversion rate 1 $unit <-> N Credits [x]
+    //   -> answering questions "how many Credits is $amount $unit ?" possible [x]
+    // check for invalid inputs
+
     let mut reader = open(&config.path)?;
     let mut buff = String::new();
 
-    // todo: this assumes the input is of manageable size
+    // this assumes the input is of manageable size
     reader.read_to_string(&mut buff)?;
 
     // strip whitespace from start end end of sentences
@@ -116,7 +130,6 @@ pub fn run(config: Config) -> PccResult<()> {
             unit_mapping.insert(k, v);
         }
     }
-    //println!("UNITS {:#?}", unit_mapping);
 
     //todo: is order important?
     for q in how_much_questions {
@@ -134,22 +147,25 @@ pub fn run(config: Config) -> PccResult<()> {
         println!("{}", DEFAULT_RESPONSE);
     }
 
-    // outline
-    // - extract statements and questions [x]
-    // - convert numerals from input to roman numerals [x]
-    // - roman numerals -> values as decimal numbers in arabic numerals [x]
-    //   -> answering questions "how much is $amount" possible [x]
-    // - extract units from input [x]
-    // - calculate conversion rate 1 $unit <-> N Credits [x]
-    //   -> answering questions "how many Credits is $amount $unit ?" possible [x]
-    // check for invalid inputs
-
     Ok(())
 }
 
+/// Returns answer to input asking "how much is ..." as String
+/// # Arguments
+/// * `numeral_mapping` - Reference to HashMap mapping alien numerals to chars I,V,X,L,C,D,M
+/// * `question` - Input question as string that should be answered
+/// # Example
+/// ```
+/// use std::collections::HashMap;
+/// use pangalacticcc::answer_how_much;
+/// let mut nm: HashMap<String, char> = HashMap::new();
+/// nm.insert("pish".to_string(), 'X');
+/// nm.insert("tegj".to_string(), 'L');
+/// nm.insert("glob".to_string(), 'I');
+/// let q = "how much is pish tegj glob glob ?";
+/// assert_eq!(answer_how_much(&nm, q),"pish tegj glob glob is 42".to_string());
+/// ```
 pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) -> String {
-    // how much is pish tegj glob glob ?
-    // -> pish tegj glob glob is 42
     //todo refactor
     let mut orig: Vec<String> = Vec::new();
     let mut numerals: Vec<String> = Vec::new();
@@ -175,15 +191,36 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
     }
 }
 
+/// Returns answer to input asking "how much is ..." as String
+/// # Arguments
+/// * `numeral_mapping` - Reference to HashMap mapping alien numerals to chars I,V,X,L,C,D,M
+/// * `question` - Input question as string that should be answered
+/// # Example
+/// ```
+/// use std::collections::HashMap;
+/// use pangalacticcc::{answer_how_many_credits, answer_how_much};
+/// let mut nm: HashMap<String, char> = HashMap::new();
+/// nm.insert("pish".to_string(), 'X');
+/// nm.insert("prok".to_string(), 'V');
+/// nm.insert("glob".to_string(), 'I');
+/// let mut um: HashMap<String, f64> = HashMap::new();
+/// um.insert("Iron".to_string(), 195.5);
+/// let q = "how many Credits is glob prok Iron ?";
+/// assert_eq!(answer_how_many_credits(&nm, &um, q),"glob prok Iron is 782 Credits".to_string());
+/// let q2 = "how many Credits is bla prok Iron ?";
+/// //assert_eq!(answer_how_many_credits(&nm, &um, q2),"I have no idea what you are talking about".to_string());
+/// let q3 = "how many Credits is glob prok Fish ?";
+/// assert_eq!(answer_how_many_credits(&nm, &um, q3),"I have no idea what you are talking about".to_string());
+///
+/// ```
 pub fn answer_how_many_credits(
     numeral_mapping: &HashMap<String, char>,
     unit_mapping: &HashMap<String, f64>,
     question: &str,
 ) -> String {
-    // how many Credits is glob prok Iron ?
-    // -> glob prok Iron is 782 Credits
-
     // todo refactor
+    // todo: error on incomplete mappings!
+    let default = "I have no idea what you are talking about".to_string();
     let amount_unit = question
         .split("how many Credits is ")
         .into_iter()
@@ -191,7 +228,10 @@ pub fn answer_how_many_credits(
         .map(|x| x.trim_end())
         .collect::<Vec<_>>();
 
-    let mut amount = amount_unit[0].split(' ').collect::<Vec<_>>();
+    let mut amount = match amount_unit.get(0){
+        None => return default,
+        Some(a) => a.split(' ').collect::<Vec<_>>()
+    };
     let unit = &amount.pop().unwrap();
 
     let roman_number = amount
@@ -209,7 +249,7 @@ pub fn answer_how_many_credits(
             );
         }
     }
-    "I have no idea what you are talking about".to_string() //todo err
+    default //todo err
 }
 
 pub fn open(path: &str) -> PccResult<Box<dyn BufRead>> {
