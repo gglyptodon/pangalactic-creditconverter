@@ -2,7 +2,6 @@ use crate::{PccResult, Roman};
 use regex::{Regex};
 use std::collections::HashMap;
 use std::error;
-use std::error::Error;
 use std::fmt::{Display, Formatter};
 
 
@@ -49,7 +48,7 @@ pub fn is_question_how_many_credits(sentence: &str) -> bool {
 
 /// ```
 pub fn is_unit_info(sentence: &str) -> bool {
-    extract_units_from_sentence(sentence) != None
+    extract_units_from_sentence(sentence).is_ok()
 }
 
 /// Returns true if sentence is statement about numerals
@@ -68,15 +67,15 @@ pub fn is_numeral_info(sentence: &str) -> bool {
     numerals_to_roman(sentence) != None
 }
 
-/// Returns a unit extracted from a sentence about unit info or None if extraction failed.
-/// Sentences are expected to also have an amount stated directly before the unit.
+/// Returns a Result with the unit extracted from a sentence about unit info or ParseSentenceError if extraction failed.
+/// Sentences are expected to have an amount stated directly before the unit.
 /// # Example
 /// ```
-/// use pangalacticcc::textprocessing::extract_units_from_sentence;
-/// assert_eq!(extract_units_from_sentence("glob prok Iron is 782 Credits"),Some("Iron".to_string()));
-/// assert_eq!(extract_units_from_sentence("Iron is 10 Credits"), None);
+/// use pangalacticcc::textprocessing::{extract_units_from_sentence, ParseSentenceError};
+/// assert_eq!(extract_units_from_sentence("glob prok Iron is 782 Credits").unwrap(),"Iron".to_string());
+/// assert_eq!(extract_units_from_sentence("Iron is 10 Credits").unwrap_err().to_string(), ParseSentenceError.to_string());
 /// ```
-pub fn extract_units_from_sentence(sentence: &str) -> Option<String> {
+pub fn extract_units_from_sentence(sentence: &str) -> PccResult<String> {
     // assuming Credits is agreed upon
     let unit_regex = Regex::new(r"^([\w ]+) is (\d+) Credits$").unwrap();
     if let Some(captures) = unit_regex.captures(sentence.trim_start().trim_end()) {
@@ -87,17 +86,17 @@ pub fn extract_units_from_sentence(sentence: &str) -> Option<String> {
         // capture group 0 is always entire match,
         // group 1: $amount $unit, group 2: $amount_arabic_numerals
         if result.len() != 3 {
-            return None;
+            return Err(ParseSentenceError.into());
         }
         let amount_unit = result.get(1).unwrap().split(' ').collect::<Vec<_>>();
         // needs at least one numeral before unit
         if amount_unit.len() < 2 {
-            return None;
+            return Err(ParseSentenceError.into());
         }
         let unit = amount_unit.last().unwrap();
-        return Some(unit.to_string());
+        return Ok(unit.to_string());
     }
-    None
+    Err(ParseSentenceError.into())
 }
 
 /// Returns a amount extracted from a sentence with numerals as integer or None if extraction failed.
@@ -204,7 +203,7 @@ pub fn extract_unit_values_from_sentence(
     sentence: &str,
 ) -> Option<(String, f64)> {
     if let Ok(amount) = extract_amounts_from_sentence(numeral_map, sentence) {
-        if let Some(unit) = extract_units_from_sentence(sentence) {
+        if let Ok(unit) = extract_units_from_sentence(sentence) {
             if let Some(num_credits) = extract_amount_credits_from_sentence(sentence) {
                 return Some((unit, num_credits as f64 / amount as f64));
             }
@@ -449,7 +448,7 @@ mod tests {
         let gold_unit = "glob prok Gold is 57800 Credits";
         let expected = "Gold".to_string();
         let result = extract_units_from_sentence(gold_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 
     #[test]
@@ -457,7 +456,7 @@ mod tests {
         let iron_unit = "pish pish Iron is 3910 Credits";
         let expected = "Iron".to_string();
         let result = extract_units_from_sentence(iron_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 
     #[test]
@@ -465,14 +464,14 @@ mod tests {
         let silver_unit = "glob glob Silver is 34 Credits";
         let expected = "Silver".to_string();
         let result = extract_units_from_sentence(silver_unit);
-        assert_eq!(Some(expected), result)
+        assert_eq!(expected, result.unwrap())
     }
 
     #[test]
-    fn test_extract_unit_gold_none() {
-        let expected = None;
+    fn test_extract_unit_gold_err() {
+        let expected = ParseSentenceError.to_string();
         let result = extract_units_from_sentence(GLOB_I);
-        assert_eq!(expected, result)
+        assert_eq!(expected, result.unwrap_err().to_string())
     }
 
     #[test]
