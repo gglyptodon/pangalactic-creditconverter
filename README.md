@@ -58,7 +58,9 @@ OPTIONS:
 - only one set of "notes" is provided per run
 - information for single numerals is provided with no further calculations necessary, e.g.
   - bla is X ✅
-  - bla is IV ❌
+  - blub is IV ❌
+- alien numerals are unique
+- alien numerals do not contain dashes `-` or other special characters
 - "Credits" is a known unit
 - phrases are following the examples provided in ``tests/input1.txt``, i.e.
   - <alien_numeral_x> is I
