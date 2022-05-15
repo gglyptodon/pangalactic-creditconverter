@@ -183,7 +183,12 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
     //todo refactor
     let mut orig: Vec<String> = Vec::new();
     let mut numerals: Vec<String> = Vec::new();
+    let reserved_tokens = ["?", "how", "much", "is"];
+    // assuming ? is separated by space
     for word in question.split(' ') {
+        if numeral_mapping.get(word).is_none() && !reserved_tokens.contains(&word){
+            print!("{} could not be translated. ", word)
+        }
         if let Some(value) = numeral_mapping.get(word) {
             //todo: better error handling
             numerals.push(
