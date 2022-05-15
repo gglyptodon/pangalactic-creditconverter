@@ -142,7 +142,7 @@ pub fn run(config: Config) -> PccResult<()> {
     for s in statements.iter().filter(|x| x.kind == UnitStatement) {
         if let Ok((k, v)) = extract_unit_values_from_sentence(&numeral_mapping, &s.text) {
             unit_mapping.insert(k, v);
-        }
+        }else { println!("I don't understand this statement about units: {}", s.text ) }
     }
 
     // answer questions
@@ -164,7 +164,7 @@ pub fn run(config: Config) -> PccResult<()> {
     Ok(())
 }
 
-/// Returns answer to input asking "how much is ..." as String
+/// Returns response to input asking "how much is ..." as String
 /// # Arguments
 /// * `numeral_mapping` - Reference to HashMap mapping alien numerals to chars I,V,X,L,C,D,M
 /// * `question` - Input question as string that should be answered
@@ -184,7 +184,7 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
     let mut orig: Vec<String> = Vec::new();
     let mut numerals: Vec<String> = Vec::new();
     let reserved_tokens = ["?", "how", "much", "is"];
-    // assuming ? is separated by space
+
     for word in question.split(' ') {
         if numeral_mapping.get(word).is_none() && !reserved_tokens.contains(&word){
             print!("{} could not be translated. ", word)
@@ -209,7 +209,7 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
     }
 }
 
-/// Returns answer to input asking "how much is ..." as String
+/// Returns response to input asking "how many credits is ..." as String
 /// # Arguments
 /// * `numeral_mapping` - Reference to HashMap mapping alien numerals to chars I,V,X,L,C,D,M
 /// * `question` - Input question as string that should be answered
@@ -226,10 +226,9 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
 /// let q = "how many Credits is glob prok Iron ?";
 /// assert_eq!(answer_how_many_credits(&nm, &um, q),"glob prok Iron is 782 Credits".to_string());
 /// let q2 = "how many Credits is bla prok Iron ?";
-/// assert_eq!(answer_how_many_credits(&nm, &um, q2),"I have no idea what you are talking about".to_string());
+/// assert_eq!(answer_how_many_credits(&nm, &um, q2),"Not everything could be translated to roman numerals: bla prok".to_string());
 /// let q3 = "how many Credits is glob prok Fish ?";
-/// assert_eq!(answer_how_many_credits(&nm, &um, q3),"I have no idea what you are talking about".to_string());
-///
+/// assert_eq!(answer_how_many_credits(&nm, &um, q3),"This unit is unkown to me: Fish".to_string());
 /// ```
 pub fn answer_how_many_credits(
     numeral_mapping: &HashMap<String, char>,
@@ -246,10 +245,12 @@ pub fn answer_how_many_credits(
         .map(|x| x.trim_end())
         .collect::<Vec<_>>();
 
+    // return default response if sentence is of different structure
     let mut amount = match amount_unit.get(0) {
         None => return default,
         Some(a) => a.split(' ').collect::<Vec<_>>(),
     };
+    // split amount and unit
     let unit = &amount.pop().unwrap();
 
     let roman_number = amount
@@ -259,7 +260,7 @@ pub fn answer_how_many_credits(
 
     // return early if alien numeral could not be converted
     if roman_number.len() != amount.len() {
-        return default;
+        return format!("Not everything could be translated to roman numerals: {}", amount.join(" "))
     }
 
     if let Some(value) = unit_mapping.get(*unit) {
@@ -271,8 +272,11 @@ pub fn answer_how_many_credits(
                 amount_parsed.get_value() as f64 * value
             );
         }
+    }else {
+        // couldn't find unit in map
+        return format!("This unit is unkown to me: {}",unit)
     }
-    default //todo err
+    default
 }
 
 /// Returns a BufReader for `path` on success.
