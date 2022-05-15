@@ -99,8 +99,8 @@ pub fn extract_units_from_sentence(sentence: &str) -> PccResult<String> {
     Err(ParseSentenceError.into())
 }
 
-/// Returns a amount extracted from a sentence with numerals as integer or None if extraction failed.
-/// Sentences are expected to also have an amount stated directly before the unit.
+/// Returns a Result with the amount extracted from a sentence with numerals as integer or ParseSententenceError if extraction failed.
+/// Sentences are expected to have an amount stated directly before the unit.
 /// # Example
 /// ```
 /// use std::collections::HashMap;
