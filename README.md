@@ -2,13 +2,16 @@
 
 [![Rust](https://github.com/gglyptodon/pangalactic-creditconverter/actions/workflows/rust.yml/badge.svg)](https://github.com/gglyptodon/pangalactic-creditconverter/actions/workflows/rust.yml)
 
-Converts alien numerals.
-Input is read from stdin or text file.
-Output is printed to stdout.
+A helpful calculator for hitchiking merchants all across the galaxy and beyond.
 
+- Converts alien numerals and units to Credits.
+- Input is read from stdin or text file.
+- Output is printed to stdout.
 
+---
 You can find the crate's documentation generated from docstrings here:
 https://gglyptodon.github.io/pangalactic-creditconverter/doc/pangalacticcc/
+---
 
 ### How to compile ###
 - follow instructions from https://www.rust-lang.org/tools/install for your operating system
