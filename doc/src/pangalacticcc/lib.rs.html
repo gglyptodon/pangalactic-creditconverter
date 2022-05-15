@@ -307,6 +307,51 @@
 <span id="302">302</span>
 <span id="303">303</span>
 <span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
 </pre><pre class="rust"><code><span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">roman</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">textprocessing</span>;
 
@@ -317,10 +362,8 @@
 };
 
 <span class="kw">use</span> <span class="ident">clap</span>::{<span class="ident">Arg</span>, <span class="ident">Command</span>};
-<span class="comment">//use regex::Regex;</span>
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::error::Error</span>;
-<span class="comment">//use std::fmt::{Display, Formatter};</span>
 <span class="kw">use</span> <span class="ident">std::fs::File</span>;
 <span class="kw">use</span> <span class="ident">std::io</span>::{<span class="ident">BufRead</span>, <span class="ident">Read</span>};
 
@@ -328,6 +371,7 @@
 
 <span class="kw">const</span> <span class="ident">DEFAULT_RESPONSE</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;I have no idea what you are talking about&quot;</span>;
 
+<span class="doccomment">/// Holds the path of the file to be processed as String.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Config</span> {
     <span class="doccomment">/// path to the input file with the gathered information.</span>
@@ -335,6 +379,7 @@
     <span class="ident">path</span>: <span class="ident">String</span>,
 }
 
+<span class="doccomment">/// Parses command line arguments</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_args</span>() -&gt; <span class="ident">PccResult</span><span class="op">&lt;</span><span class="ident">Config</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">matches</span> <span class="op">=</span> <span class="ident">Command::new</span>(<span class="string">&quot;pangalacticc&quot;</span>)
         .<span class="ident">about</span>(<span class="string">&quot;Pangalactic Credit Converter&quot;</span>)
@@ -352,17 +397,26 @@
 
     <span class="comment">// we can safely unwrap here because we set a default</span>
     <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of_lossy</span>(<span class="string">&quot;input_path&quot;</span>).<span class="ident">unwrap</span>().<span class="ident">to_string</span>();
-
     <span class="prelude-val">Ok</span>(<span class="ident">Config</span> { <span class="ident">path</span> })
 }
 
-<span class="doccomment">/// output is printed to stdout</span>
+<span class="doccomment">/// Runs the program on provided config.</span>
+<span class="doccomment">/// Output is printed to stdout</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="ident">config</span>: <span class="ident">Config</span>) -&gt; <span class="ident">PccResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="comment">//unimplemented!();</span>
+    <span class="comment">// outline</span>
+    <span class="comment">// - extract statements and questions [x]</span>
+    <span class="comment">// - convert numerals from input to roman numerals [x]</span>
+    <span class="comment">// - roman numerals -&gt; values as decimal numbers in arabic numerals [x]</span>
+    <span class="comment">//   -&gt; answering questions &quot;how much is $amount&quot; possible [x]</span>
+    <span class="comment">// - extract units from input [x]</span>
+    <span class="comment">// - calculate conversion rate 1 $unit &lt;-&gt; N Credits [x]</span>
+    <span class="comment">//   -&gt; answering questions &quot;how many Credits is $amount $unit ?&quot; possible [x]</span>
+    <span class="comment">// check for invalid inputs</span>
+
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">path</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buff</span> <span class="op">=</span> <span class="ident">String::new</span>();
 
-    <span class="comment">// todo: this assumes the input is of manageable size</span>
+    <span class="comment">// this assumes the input is of manageable size</span>
     <span class="ident">reader</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buff</span>)<span class="question-mark">?</span>;
 
     <span class="comment">// strip whitespace from start end end of sentences</span>
@@ -425,7 +479,6 @@
             <span class="ident">unit_mapping</span>.<span class="ident">insert</span>(<span class="ident">k</span>, <span class="ident">v</span>);
         }
     }
-    <span class="comment">//println!(&quot;UNITS {:#?}&quot;, unit_mapping);</span>
 
     <span class="comment">//todo: is order important?</span>
     <span class="kw">for</span> <span class="ident">q</span> <span class="kw">in</span> <span class="ident">how_much_questions</span> {
@@ -443,22 +496,25 @@
         <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">DEFAULT_RESPONSE</span>);
     }
 
-    <span class="comment">// outline</span>
-    <span class="comment">// - extract statements and questions [x]</span>
-    <span class="comment">// - convert numerals from input to roman numerals [x]</span>
-    <span class="comment">// - roman numerals -&gt; values as decimal numbers in arabic numerals [x]</span>
-    <span class="comment">//   -&gt; answering questions &quot;how much is $amount&quot; possible [x]</span>
-    <span class="comment">// - extract units from input [x]</span>
-    <span class="comment">// - calculate conversion rate 1 $unit &lt;-&gt; N Credits [x]</span>
-    <span class="comment">//   -&gt; answering questions &quot;how many Credits is $amount $unit ?&quot; possible [x]</span>
-    <span class="comment">// check for invalid inputs</span>
-
     <span class="prelude-val">Ok</span>(())
 }
 
+<span class="doccomment">/// Returns answer to input asking &quot;how much is ...&quot; as String</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">/// * `numeral_mapping` - Reference to HashMap mapping alien numerals to chars I,V,X,L,C,D,M</span>
+<span class="doccomment">/// * `question` - Input question as string that should be answered</span>
+<span class="doccomment">/// # Example</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use std::collections::HashMap;</span>
+<span class="doccomment">/// use pangalacticcc::answer_how_much;</span>
+<span class="doccomment">/// let mut nm: HashMap&lt;String, char&gt; = HashMap::new();</span>
+<span class="doccomment">/// nm.insert(&quot;pish&quot;.to_string(), &#39;X&#39;);</span>
+<span class="doccomment">/// nm.insert(&quot;tegj&quot;.to_string(), &#39;L&#39;);</span>
+<span class="doccomment">/// nm.insert(&quot;glob&quot;.to_string(), &#39;I&#39;);</span>
+<span class="doccomment">/// let q = &quot;how much is pish tegj glob glob ?&quot;;</span>
+<span class="doccomment">/// assert_eq!(answer_how_much(&amp;nm, q),&quot;pish tegj glob glob is 42&quot;.to_string());</span>
+<span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">answer_how_much</span>(<span class="ident">numeral_mapping</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">char</span><span class="op">&gt;</span>, <span class="ident">question</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">String</span> {
-    <span class="comment">// how much is pish tegj glob glob ?</span>
-    <span class="comment">// -&gt; pish tegj glob glob is 42</span>
     <span class="comment">//todo refactor</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">orig</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">numerals</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
@@ -484,15 +540,36 @@
     }
 }
 
+<span class="doccomment">/// Returns answer to input asking &quot;how much is ...&quot; as String</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">/// * `numeral_mapping` - Reference to HashMap mapping alien numerals to chars I,V,X,L,C,D,M</span>
+<span class="doccomment">/// * `question` - Input question as string that should be answered</span>
+<span class="doccomment">/// # Example</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use std::collections::HashMap;</span>
+<span class="doccomment">/// use pangalacticcc::{answer_how_many_credits};</span>
+<span class="doccomment">/// let mut nm: HashMap&lt;String, char&gt; = HashMap::new();</span>
+<span class="doccomment">/// nm.insert(&quot;pish&quot;.to_string(), &#39;X&#39;);</span>
+<span class="doccomment">/// nm.insert(&quot;prok&quot;.to_string(), &#39;V&#39;);</span>
+<span class="doccomment">/// nm.insert(&quot;glob&quot;.to_string(), &#39;I&#39;);</span>
+<span class="doccomment">/// let mut um: HashMap&lt;String, f64&gt; = HashMap::new();</span>
+<span class="doccomment">/// um.insert(&quot;Iron&quot;.to_string(), 195.5);</span>
+<span class="doccomment">/// let q = &quot;how many Credits is glob prok Iron ?&quot;;</span>
+<span class="doccomment">/// assert_eq!(answer_how_many_credits(&amp;nm, &amp;um, q),&quot;glob prok Iron is 782 Credits&quot;.to_string());</span>
+<span class="doccomment">/// let q2 = &quot;how many Credits is bla prok Iron ?&quot;;</span>
+<span class="doccomment">/// assert_eq!(answer_how_many_credits(&amp;nm, &amp;um, q2),&quot;I have no idea what you are talking about&quot;.to_string());</span>
+<span class="doccomment">/// let q3 = &quot;how many Credits is glob prok Fish ?&quot;;</span>
+<span class="doccomment">/// assert_eq!(answer_how_many_credits(&amp;nm, &amp;um, q3),&quot;I have no idea what you are talking about&quot;.to_string());</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">answer_how_many_credits</span>(
     <span class="ident">numeral_mapping</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">char</span><span class="op">&gt;</span>,
     <span class="ident">unit_mapping</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">f64</span><span class="op">&gt;</span>,
     <span class="ident">question</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 ) -&gt; <span class="ident">String</span> {
-    <span class="comment">// how many Credits is glob prok Iron ?</span>
-    <span class="comment">// -&gt; glob prok Iron is 782 Credits</span>
-
     <span class="comment">// todo refactor</span>
+    <span class="comment">// todo: error on incomplete mappings!</span>
+    <span class="kw">let</span> <span class="ident">default</span> <span class="op">=</span> <span class="string">&quot;I have no idea what you are talking about&quot;</span>.<span class="ident">to_string</span>();
     <span class="kw">let</span> <span class="ident">amount_unit</span> <span class="op">=</span> <span class="ident">question</span>
         .<span class="ident">split</span>(<span class="string">&quot;how many Credits is &quot;</span>)
         .<span class="ident">into_iter</span>()
@@ -500,13 +577,21 @@
         .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">trim_end</span>())
         .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">amount</span> <span class="op">=</span> <span class="ident">amount_unit</span>[<span class="number">0</span>].<span class="ident">split</span>(<span class="string">&#39; &#39;</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">amount</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">amount_unit</span>.<span class="ident">get</span>(<span class="number">0</span>) {
+        <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="ident">default</span>,
+        <span class="prelude-val">Some</span>(<span class="ident">a</span>) =&gt; <span class="ident">a</span>.<span class="ident">split</span>(<span class="string">&#39; &#39;</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
+    };
     <span class="kw">let</span> <span class="ident">unit</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">amount</span>.<span class="ident">pop</span>().<span class="ident">unwrap</span>();
 
     <span class="kw">let</span> <span class="ident">roman_number</span> <span class="op">=</span> <span class="ident">amount</span>
         .<span class="ident">iter</span>()
         .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">numeral_mapping</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">x</span>))
-        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>(); <span class="comment">// todo</span>
+        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>();
+
+    <span class="comment">// return early if alien numeral could not be converted</span>
+    <span class="kw">if</span> <span class="ident">roman_number</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">amount</span>.<span class="ident">len</span>() {
+        <span class="kw">return</span> <span class="ident">default</span>;
+    }
 
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">unit_mapping</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">unit</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">amount_parsed</span>) <span class="op">=</span> <span class="ident">roman_number</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Roman</span><span class="op">&gt;</span>() {
@@ -518,9 +603,14 @@
             );
         }
     }
-    <span class="string">&quot;I have no idea what you are talking about&quot;</span>.<span class="ident">to_string</span>() <span class="comment">//todo err</span>
+    <span class="ident">default</span> <span class="comment">//todo err</span>
 }
 
+<span class="doccomment">/// Returns a BufReader for `path` on success.</span>
+<span class="doccomment">/// If `path` is `&quot;-&quot;`,  BufReader for stdin is returned,</span>
+<span class="doccomment">/// otherwise BufReader for file `path` is returned.</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">/// * `path` -  A file name or &quot;-&quot;.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">PccResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BufRead</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">path</span> <span class="op">==</span> <span class="string">&quot;-&quot;</span> {
         <span class="comment">// input is stdin</span>
