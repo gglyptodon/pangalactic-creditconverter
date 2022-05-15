@@ -6,6 +6,10 @@ Converts alien numerals.
 Input is read from stdin or text file.
 Output is printed to stdout.
 
+
+You can find the crate's documentation generated from docstrings here:
+https://gglyptodon.github.io/pangalactic-creditconverter/doc/pangalacticcc/
+
 ### How to compile ###
 - follow instructions from https://www.rust-lang.org/tools/install for your operating system
 - clone this repository, change to project directory, and run or build with ``cargo``: 
