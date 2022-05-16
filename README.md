@@ -2,7 +2,7 @@
 
 [![Rust](https://github.com/gglyptodon/pangalactic-creditconverter/actions/workflows/rust.yml/badge.svg)](https://github.com/gglyptodon/pangalactic-creditconverter/actions/workflows/rust.yml)
 
-A helpful calculator for hitchiking merchants all across the galaxy and beyond.
+A helpful calculator for hitchhiking merchants all across the galaxy and beyond.
 
 - Converts alien numerals and units to Credits.
 - Input is read from stdin or text file.
