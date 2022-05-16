@@ -190,7 +190,7 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
     let reserved_tokens = ["?", "how", "much", "is"];
 
     for word in question.split(' ') {
-        if numeral_mapping.get(word).is_none() && !reserved_tokens.contains(&word){
+        if numeral_mapping.get(word).is_none() && !reserved_tokens.contains(&word) && !word.is_empty(){
             print!("{} could not be translated. ", word)
         }
         if let Some(value) = numeral_mapping.get(word) {

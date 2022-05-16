@@ -70,6 +70,7 @@ OPTIONS:
   - <required_alien_numeral_i>  <optional_alien_numeral_j [...] optional_alien_numeral_z> <required_alien_unit> is <required_amount_in_arabic_numerals> Credits.
   - how much is <required_alien_numeral> <optional_alien_numeral_j [...] optional_alien_numeral_z> ?
   - how many Credits is <required_alien_numeral> <optional_alien_numeral_j [...] optional_alien_numeral_z> <required_alien_unit> ?
+  - there is at least one space character right before "?" at the end of questions (see above).
 - empty lines will be ignored    
 - anything that does not fit the above structure will be responded to with ``I have no idea what you are talking about`` unless a more specific response can be applied.
 - any question that cannot be answered will be responded to with the above response, too.
