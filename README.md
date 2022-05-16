@@ -14,23 +14,28 @@ https://gglyptodon.github.io/pangalactic-creditconverter/
 ----
 
 ### How to compile ###
-- follow instructions from https://www.rust-lang.org/tools/install for your operating system
+- follow instructions from https://www.rust-lang.org/tools/install for your operating system to install the rust build tools, incl. cargo
 - clone this repository, change to project directory, and run or build with ``cargo``: 
   - ``git clone https://github.com/gglyptodon/pangalactic-creditconverter.git``
   - ``cd pangalactic-creditconverter/pangalacticcc``
   - ``cargo build --release`` will build the project.
     - the compiled binary can then be found under ``target/release/pangalacticcc`` .
-    - ``target/release/pangalacticcc -h `` displays a help message
-    - ``target/release/pangalacticcc tests/input/input1.txt `` runs the program on the provided example data.
+    - ``target/release/pangalacticcc -h`` displays a help message
+    - ``target/release/pangalacticcc tests/input/input1.txt`` runs the program on the provided example data.
   - alternatively, run via cargo:  
     - ``cargo run -- -h`` will display a help message.
-    - ``cargo run -- tests/input/input1.txt `` will display example output.
+    - ``cargo run -- tests/input/input1.txt`` will display example output.
 
+### Pre-built binaries ###
+If you are on linux (x86_amd64) or mac os (x86_amd64), you can also use the pre-built binaries from here:
+https://github.com/gglyptodon/pangalactic-creditconverter/releases . 
 
 ### How to run tests ###
+- follow instructions from https://www.rust-lang.org/tools/install for your operating system to install the rust build tools, incl. cargo
 - ``git clone https://github.com/gglyptodon/pangalactic-creditconverter.git``
 - ``cd pangalactic-creditconverter/pangalacticcc``
 - ``cargo test`` runs all provided tests.
+
 
 ----
 
@@ -71,6 +76,8 @@ OPTIONS:
   - how much is <required_alien_numeral> <optional_alien_numeral_j [...] optional_alien_numeral_z> ?
   - how many Credits is <required_alien_numeral> <optional_alien_numeral_j [...] optional_alien_numeral_z> <required_alien_unit> ?
   - there is at least one space character right before "?" at the end of questions (see above).
+
+#### Some more info on the program's behavior ###
 - empty lines will be ignored    
 - anything that does not fit the above structure will be responded to with ``I have no idea what you are talking about`` unless a more specific response can be applied.
 - any question that cannot be answered will be responded to with the above response, too.
