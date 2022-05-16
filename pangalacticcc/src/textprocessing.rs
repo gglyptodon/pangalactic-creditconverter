@@ -1,5 +1,5 @@
 use crate::{PccResult, Roman};
-use regex::{Regex};
+use regex::Regex;
 use std::collections::HashMap;
 use std::error;
 use std::fmt::{Display, Formatter};
@@ -8,7 +8,7 @@ use std::fmt::{Display, Formatter};
 /// e.g. due to missing mappings.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ParseSentenceError;
-impl error::Error for ParseSentenceError{}
+impl error::Error for ParseSentenceError {}
 impl Display for ParseSentenceError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "could not parse input")
@@ -18,7 +18,7 @@ impl Display for ParseSentenceError {
 /// Occurs when alien numeral could not be mapped
 #[derive(Debug, Clone, PartialEq)]
 pub struct MapAlienNumeralError;
-impl error::Error for MapAlienNumeralError{}
+impl error::Error for MapAlienNumeralError {}
 impl Display for MapAlienNumeralError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "could not map alien numeral")
@@ -137,7 +137,7 @@ pub fn extract_amounts_from_sentence(
         // group 1: $amount $unit, group 2: $amount_arabic_numerals
 
         if result.len() != 3 {
-            return Err(ParseSentenceError.into())
+            return Err(ParseSentenceError.into());
         }
         let mut amount = result.get(1).unwrap().split(' ').collect::<Vec<_>>();
         amount.pop(); //discard last element which should be the unit
@@ -155,10 +155,10 @@ pub fn extract_amounts_from_sentence(
                 result.push(*n);
             }
             if let Ok(roman) = result.parse::<Roman>() {
-                return Ok(roman.get_value() as i32)
+                return Ok(roman.get_value() as i32);
             }
             Err(ParseSentenceError.into())
-        }
+        };
     }
     Err(ParseSentenceError.into())
 }

@@ -146,7 +146,9 @@ pub fn run(config: Config) -> PccResult<()> {
     for s in statements.iter().filter(|x| x.kind == UnitStatement) {
         if let Ok((k, v)) = extract_unit_values_from_sentence(&numeral_mapping, &s.text) {
             unit_mapping.insert(k, v);
-        }else { println!("I don't understand this statement about units: {}", s.text ) }
+        } else {
+            println!("I don't understand this statement about units: {}", s.text)
+        }
     }
 
     // answer questions
@@ -184,17 +186,18 @@ pub fn run(config: Config) -> PccResult<()> {
 /// assert_eq!(answer_how_much(&nm, q),"pish tegj glob glob is 42".to_string());
 /// ```
 pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) -> String {
-    //todo refactor
     let mut orig: Vec<String> = Vec::new();
     let mut numerals: Vec<String> = Vec::new();
     let reserved_tokens = ["?", "how", "much", "is"];
 
     for word in question.split(' ') {
-        if numeral_mapping.get(word).is_none() && !reserved_tokens.contains(&word) && !word.is_empty(){
+        if numeral_mapping.get(word).is_none()
+            && !reserved_tokens.contains(&word)
+            && !word.is_empty()
+        {
             print!("{} could not be translated. ", word)
         }
         if let Some(value) = numeral_mapping.get(word) {
-            //todo: better error handling
             numerals.push(
                 value
                     .to_string()
@@ -209,7 +212,11 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
     if let Ok(result) = numerals.join("").parse::<Roman>() {
         format!("{} is {}", orig.join(" "), result.get_value())
     } else {
-        format!("I don't know how to interpret this number: {} -> {}", orig.join(" "), numerals.join(""))
+        format!(
+            "I don't know how to interpret this number: {} -> {}",
+            orig.join(" "),
+            numerals.join("")
+        )
     }
 }
 
@@ -228,11 +235,11 @@ pub fn answer_how_much(numeral_mapping: &HashMap<String, char>, question: &str) 
 /// let mut um: HashMap<String, f64> = HashMap::new();
 /// um.insert("Iron".to_string(), 195.5);
 /// let q = "how many Credits is glob prok Iron ?";
-/// assert_eq!(answer_how_many_credits(&nm, &um, q),"glob prok Iron is 782 Credits".to_string());
+/// assert_eq!(answer_how_many_credits(&nm, &um, q), "glob prok Iron is 782 Credits".to_string());
 /// let q2 = "how many Credits is bla prok Iron ?";
-/// assert_eq!(answer_how_many_credits(&nm, &um, q2),"Not everything could be translated to roman numerals: bla prok".to_string());
+/// assert_eq!(answer_how_many_credits(&nm, &um, q2), "Not everything could be translated to roman numerals: bla prok".to_string());
 /// let q3 = "how many Credits is glob prok Fish ?";
-/// assert_eq!(answer_how_many_credits(&nm, &um, q3),"This unit is unkown to me: Fish".to_string());
+/// assert_eq!(answer_how_many_credits(&nm, &um, q3), "This unit is unkown to me: Fish".to_string());
 /// ```
 pub fn answer_how_many_credits(
     numeral_mapping: &HashMap<String, char>,
@@ -264,7 +271,10 @@ pub fn answer_how_many_credits(
 
     // return early if alien numeral could not be converted
     if roman_number.len() != amount.len() {
-        return format!("Not everything could be translated to roman numerals: {}", amount.join(" "))
+        return format!(
+            "Not everything could be translated to roman numerals: {}",
+            amount.join(" ")
+        );
     }
 
     if let Some(value) = unit_mapping.get(*unit) {
@@ -276,9 +286,9 @@ pub fn answer_how_many_credits(
                 amount_parsed.get_value() as f64 * value
             );
         }
-    }else {
+    } else {
         // couldn't find unit in map
-        return format!("This unit is unkown to me: {}",unit)
+        return format!("This unit is unkown to me: {}", unit);
     }
     default
 }

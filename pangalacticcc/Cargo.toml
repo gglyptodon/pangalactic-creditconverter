@@ -1,6 +1,6 @@
 [package]
 name = "pangalacticcc"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "A calculator for hitchhiking merchants all across the galaxy and beyond."
 authors = ["Janina Mass <janina.mass@gmail.com>"]
