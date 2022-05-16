@@ -383,6 +383,16 @@
 <span id="378">378</span>
 <span id="379">379</span>
 <span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A helpful calculator for hitchhiking merchants all across the galaxy and beyond.</span>
 <span class="doccomment">//! Converts alien numerals and units to Credits.</span>
 <span class="doccomment">//! Input is read from stdin or text file.</span>
@@ -531,7 +541,9 @@
     <span class="kw">for</span> <span class="ident">s</span> <span class="kw">in</span> <span class="ident">statements</span>.<span class="ident">iter</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">UnitStatement</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>((<span class="ident">k</span>, <span class="ident">v</span>)) <span class="op">=</span> <span class="ident">extract_unit_values_from_sentence</span>(<span class="kw-2">&amp;</span><span class="ident">numeral_mapping</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">text</span>) {
             <span class="ident">unit_mapping</span>.<span class="ident">insert</span>(<span class="ident">k</span>, <span class="ident">v</span>);
-        }<span class="kw">else</span> { <span class="macro">println!</span>(<span class="string">&quot;I don&#39;t understand this statement about units: {}&quot;</span>, <span class="ident">s</span>.<span class="ident">text</span> ) }
+        } <span class="kw">else</span> {
+            <span class="macro">println!</span>(<span class="string">&quot;I don&#39;t understand this statement about units: {}&quot;</span>, <span class="ident">s</span>.<span class="ident">text</span>)
+        }
     }
 
     <span class="comment">// answer questions</span>
@@ -569,17 +581,18 @@
 <span class="doccomment">/// assert_eq!(answer_how_much(&amp;nm, q),&quot;pish tegj glob glob is 42&quot;.to_string());</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">answer_how_much</span>(<span class="ident">numeral_mapping</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">char</span><span class="op">&gt;</span>, <span class="ident">question</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">String</span> {
-    <span class="comment">//todo refactor</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">orig</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">numerals</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="kw">let</span> <span class="ident">reserved_tokens</span> <span class="op">=</span> [<span class="string">&quot;?&quot;</span>, <span class="string">&quot;how&quot;</span>, <span class="string">&quot;much&quot;</span>, <span class="string">&quot;is&quot;</span>];
 
     <span class="kw">for</span> <span class="ident">word</span> <span class="kw">in</span> <span class="ident">question</span>.<span class="ident">split</span>(<span class="string">&#39; &#39;</span>) {
-        <span class="kw">if</span> <span class="ident">numeral_mapping</span>.<span class="ident">get</span>(<span class="ident">word</span>).<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">reserved_tokens</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">word</span>){
+        <span class="kw">if</span> <span class="ident">numeral_mapping</span>.<span class="ident">get</span>(<span class="ident">word</span>).<span class="ident">is_none</span>()
+            <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">reserved_tokens</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">word</span>)
+            <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">word</span>.<span class="ident">is_empty</span>()
+        {
             <span class="macro">print!</span>(<span class="string">&quot;{} could not be translated. &quot;</span>, <span class="ident">word</span>)
         }
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">numeral_mapping</span>.<span class="ident">get</span>(<span class="ident">word</span>) {
-            <span class="comment">//todo: better error handling</span>
             <span class="ident">numerals</span>.<span class="ident">push</span>(
                 <span class="ident">value</span>
                     .<span class="ident">to_string</span>()
@@ -594,7 +607,11 @@
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">result</span>) <span class="op">=</span> <span class="ident">numerals</span>.<span class="ident">join</span>(<span class="string">&quot;&quot;</span>).<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Roman</span><span class="op">&gt;</span>() {
         <span class="macro">format!</span>(<span class="string">&quot;{} is {}&quot;</span>, <span class="ident">orig</span>.<span class="ident">join</span>(<span class="string">&quot; &quot;</span>), <span class="ident">result</span>.<span class="ident">get_value</span>())
     } <span class="kw">else</span> {
-        <span class="macro">format!</span>(<span class="string">&quot;I don&#39;t know how to interpret this number: {} -&gt; {}&quot;</span>, <span class="ident">orig</span>.<span class="ident">join</span>(<span class="string">&quot; &quot;</span>), <span class="ident">numerals</span>.<span class="ident">join</span>(<span class="string">&quot;&quot;</span>))
+        <span class="macro">format!</span>(
+            <span class="string">&quot;I don&#39;t know how to interpret this number: {} -&gt; {}&quot;</span>,
+            <span class="ident">orig</span>.<span class="ident">join</span>(<span class="string">&quot; &quot;</span>),
+            <span class="ident">numerals</span>.<span class="ident">join</span>(<span class="string">&quot;&quot;</span>)
+        )
     }
 }
 
@@ -613,11 +630,11 @@
 <span class="doccomment">/// let mut um: HashMap&lt;String, f64&gt; = HashMap::new();</span>
 <span class="doccomment">/// um.insert(&quot;Iron&quot;.to_string(), 195.5);</span>
 <span class="doccomment">/// let q = &quot;how many Credits is glob prok Iron ?&quot;;</span>
-<span class="doccomment">/// assert_eq!(answer_how_many_credits(&amp;nm, &amp;um, q),&quot;glob prok Iron is 782 Credits&quot;.to_string());</span>
+<span class="doccomment">/// assert_eq!(answer_how_many_credits(&amp;nm, &amp;um, q), &quot;glob prok Iron is 782 Credits&quot;.to_string());</span>
 <span class="doccomment">/// let q2 = &quot;how many Credits is bla prok Iron ?&quot;;</span>
-<span class="doccomment">/// assert_eq!(answer_how_many_credits(&amp;nm, &amp;um, q2),&quot;Not everything could be translated to roman numerals: bla prok&quot;.to_string());</span>
+<span class="doccomment">/// assert_eq!(answer_how_many_credits(&amp;nm, &amp;um, q2), &quot;Not everything could be translated to roman numerals: bla prok&quot;.to_string());</span>
 <span class="doccomment">/// let q3 = &quot;how many Credits is glob prok Fish ?&quot;;</span>
-<span class="doccomment">/// assert_eq!(answer_how_many_credits(&amp;nm, &amp;um, q3),&quot;This unit is unkown to me: Fish&quot;.to_string());</span>
+<span class="doccomment">/// assert_eq!(answer_how_many_credits(&amp;nm, &amp;um, q3), &quot;This unit is unkown to me: Fish&quot;.to_string());</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">answer_how_many_credits</span>(
     <span class="ident">numeral_mapping</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">char</span><span class="op">&gt;</span>,
@@ -649,7 +666,10 @@
 
     <span class="comment">// return early if alien numeral could not be converted</span>
     <span class="kw">if</span> <span class="ident">roman_number</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">amount</span>.<span class="ident">len</span>() {
-        <span class="kw">return</span> <span class="macro">format!</span>(<span class="string">&quot;Not everything could be translated to roman numerals: {}&quot;</span>, <span class="ident">amount</span>.<span class="ident">join</span>(<span class="string">&quot; &quot;</span>))
+        <span class="kw">return</span> <span class="macro">format!</span>(
+            <span class="string">&quot;Not everything could be translated to roman numerals: {}&quot;</span>,
+            <span class="ident">amount</span>.<span class="ident">join</span>(<span class="string">&quot; &quot;</span>)
+        );
     }
 
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">unit_mapping</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">unit</span>) {
@@ -661,9 +681,9 @@
                 <span class="ident">amount_parsed</span>.<span class="ident">get_value</span>() <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="ident">value</span>
             );
         }
-    }<span class="kw">else</span> {
+    } <span class="kw">else</span> {
         <span class="comment">// couldn&#39;t find unit in map</span>
-        <span class="kw">return</span> <span class="macro">format!</span>(<span class="string">&quot;This unit is unkown to me: {}&quot;</span>,<span class="ident">unit</span>)
+        <span class="kw">return</span> <span class="macro">format!</span>(<span class="string">&quot;This unit is unkown to me: {}&quot;</span>, <span class="ident">unit</span>);
     }
     <span class="ident">default</span>
 }

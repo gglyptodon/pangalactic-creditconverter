@@ -571,7 +571,7 @@
 <span id="566">566</span>
 <span id="567">567</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">PccResult</span>, <span class="ident">Roman</span>};
-<span class="kw">use</span> <span class="ident">regex</span>::{<span class="ident">Regex</span>};
+<span class="kw">use</span> <span class="ident">regex::Regex</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::error</span>;
 <span class="kw">use</span> <span class="ident">std::fmt</span>::{<span class="ident">Display</span>, <span class="ident">Formatter</span>};
@@ -580,7 +580,7 @@
 <span class="doccomment">/// e.g. due to missing mappings.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ParseSentenceError</span>;
-<span class="kw">impl</span> <span class="ident">error::Error</span> <span class="kw">for</span> <span class="ident">ParseSentenceError</span>{}
+<span class="kw">impl</span> <span class="ident">error::Error</span> <span class="kw">for</span> <span class="ident">ParseSentenceError</span> {}
 <span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">ParseSentenceError</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;could not parse input&quot;</span>)
@@ -590,7 +590,7 @@
 <span class="doccomment">/// Occurs when alien numeral could not be mapped</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MapAlienNumeralError</span>;
-<span class="kw">impl</span> <span class="ident">error::Error</span> <span class="kw">for</span> <span class="ident">MapAlienNumeralError</span>{}
+<span class="kw">impl</span> <span class="ident">error::Error</span> <span class="kw">for</span> <span class="ident">MapAlienNumeralError</span> {}
 <span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">MapAlienNumeralError</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;could not map alien numeral&quot;</span>)
@@ -709,7 +709,7 @@
         <span class="comment">// group 1: $amount $unit, group 2: $amount_arabic_numerals</span>
 
         <span class="kw">if</span> <span class="ident">result</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">3</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>())
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>());
         }
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">amount</span> <span class="op">=</span> <span class="ident">result</span>.<span class="ident">get</span>(<span class="number">1</span>).<span class="ident">unwrap</span>().<span class="ident">split</span>(<span class="string">&#39; &#39;</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
         <span class="ident">amount</span>.<span class="ident">pop</span>(); <span class="comment">//discard last element which should be the unit</span>
@@ -727,10 +727,10 @@
                 <span class="ident">result</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">n</span>);
             }
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">roman</span>) <span class="op">=</span> <span class="ident">result</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Roman</span><span class="op">&gt;</span>() {
-                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">roman</span>.<span class="ident">get_value</span>() <span class="kw">as</span> <span class="ident">i32</span>)
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">roman</span>.<span class="ident">get_value</span>() <span class="kw">as</span> <span class="ident">i32</span>);
             }
             <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>())
-        }
+        };
     }
     <span class="prelude-val">Err</span>(<span class="ident">ParseSentenceError</span>.<span class="ident">into</span>())
 }
