@@ -14,6 +14,8 @@ const INPUT1_REORDERED: &str = "tests/input/input1_reordered.txt";
 const OUTPUT1_REORDERED: &str = "tests/expected/input1_reordered.txt.out";
 const INPUT2: &str = "tests/input/input2.txt";
 const OUTPUT2: &str = "tests/expected/input2.txt.out";
+const INPUT3_UNIT_REDEF: &str = "tests/input/input3_confusing_unit.txt";
+const OUTPUT3_UNIT_REDEF: &str = "tests/expected/input3_confusing_unit.txt.out";
 // test boilerplate
 fn gen_non_existing_file() -> String {
     loop {
@@ -82,4 +84,9 @@ fn test_input1_reordered() -> TestResult {
 #[test]
 fn test_input2() -> TestResult {
     run(&[INPUT2], OUTPUT2)
+}
+
+#[test]
+fn test_input3_confusing_unit() -> TestResult {
+    run(&[INPUT3_UNIT_REDEF], OUTPUT3_UNIT_REDEF)
 }
