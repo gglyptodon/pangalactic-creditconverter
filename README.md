@@ -73,6 +73,7 @@ OPTIONS:
   - <alien_numeral_y> is L 
   - [...]
   - <required_alien_numeral_i>  <optional_alien_numeral_j [...] optional_alien_numeral_z> <required_alien_unit> is <required_amount_in_arabic_numerals> Credits.
+    - where <required_amount_in_arabic_numerals> is non-negative
   - how much is <required_alien_numeral> <optional_alien_numeral_j [...] optional_alien_numeral_z> ?
   - how many Credits is <required_alien_numeral> <optional_alien_numeral_j [...] optional_alien_numeral_z> <required_alien_unit> ?
   - there is at least one space character right before "?" at the end of questions (see above).
