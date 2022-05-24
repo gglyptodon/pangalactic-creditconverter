@@ -145,9 +145,12 @@ pub fn run(config: Config) -> PccResult<()> {
     let mut unit_mapping: HashMap<String, f64> = HashMap::new();
     for s in statements.iter().filter(|x| x.kind == UnitStatement) {
         if let Ok((k, v)) = extract_unit_values_from_sentence(&numeral_mapping, &s.text) {
-            if let Some(old_value) = unit_mapping.get(&*k){
-                if *old_value != v{
-                    println!("\"{}\" has ambiguous value. Old: {}, new {}. Using new definition.", k, old_value, v)
+            if let Some(old_value) = unit_mapping.get(&*k) {
+                if *old_value != v {
+                    println!(
+                        "\"{}\" has ambiguous value. Old: {}, new {}. Using new definition.",
+                        k, old_value, v
+                    )
                 }
             }
             unit_mapping.insert(k, v);
